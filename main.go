@@ -1,17 +1,23 @@
-package main 
+package main
 
 import (
-    "net/http"
-    "fmt"
+	"fmt"
+	"net/http"
+
+	gbuild "github.com/gopherjs/gopherjs/build"
+	"github.com/kelwang/gopherjs/tool"
 )
+
+var basePath = "github.com/kelwang/gopherjs-mockup/"
 
 // Default Request Handler
 func defaultHandler(w http.ResponseWriter, r *http.Request) {
-    fmt.Fprintf(w, "<h1>Hello %s!</h1>", r.URL.Path[1:])
+	fmt.Fprint(w, `<html><head><title>GopherJS Mockup</title></head><body><script src="/mockup/script/script.js"></script></body></html>`)
 }
 
 func main() {
-    http.HandleFunc("/", defaultHandler)
-    http.ListenAndServe(":8080", nil)
+	options := &gbuild.Options{CreateMapFile: true}
+	http.Handle("/mockup/", tool.Handler(basePath+"mockup/", options, len("/mockup/")))
+	http.HandleFunc("/", defaultHandler)
+	http.ListenAndServe(":9390", nil)
 }
-
