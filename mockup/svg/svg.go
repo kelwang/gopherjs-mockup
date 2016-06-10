@@ -12,7 +12,7 @@ type Svg struct {
 
 func jsString(a interface{}) string {
 	if a != nil {
-		s := js.Global.Call("string", a).String()
+		s := js.Global.Call("String", a).String()
 		if s != "undefined" && s != "null" {
 			return s
 		}
@@ -39,6 +39,8 @@ type Rect struct {
 	Height float64 `svg:"height"`
 	X      float64 `svg:"x"`
 	Y      float64 `svg:"y"`
+	RX     float64 `svg:"rx"`
+	RY     float64 `svg:"ry"`
 	Strokeable
 	Fillable
 }
@@ -49,6 +51,12 @@ func (se *Rect) String() string {
 	s := `<rect width="` + jsString(se.Width) + `" height="` + jsString(se.Height) + `" x="` + jsString(se.X) + `" y="` + jsString(se.Y) + `"`
 	s += se.Fillable.String()
 	s += se.Strokeable.String()
+	if se.RX != 0 {
+		s += ` rx="` + jsString(se.RX) + `"`
+	}
+	if se.RY != 0 {
+		s += ` ry="` + jsString(se.RY) + `"`
+	}
 	s += `" >` + unSupportMsg + `</rect>`
 	return s
 }
