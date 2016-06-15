@@ -42,6 +42,7 @@ type Rect struct {
 	RX     float64 `svg:"rx"`
 	RY     float64 `svg:"ry"`
 	Strokeable
+	Draggable
 	Fillable
 }
 
@@ -51,6 +52,7 @@ func (se *Rect) String() string {
 	s := `<rect width="` + jsString(se.Width) + `" height="` + jsString(se.Height) + `" x="` + jsString(se.X) + `" y="` + jsString(se.Y) + `"`
 	s += se.Fillable.String()
 	s += se.Strokeable.String()
+	s += se.Draggable.String()
 	if se.RX != 0 {
 		s += ` rx="` + jsString(se.RX) + `"`
 	}
@@ -77,6 +79,17 @@ func (se Strokeable) String() string {
 	return s
 }
 
+type Draggable struct {
+	Draggable bool
+}
+
+func (draggable Draggable) String() string {
+	if draggable.Draggable {
+		return ` class="draggable"`
+	}
+	return ""
+}
+
 type Fillable struct {
 	Fill string `svg:"fill"`
 }
@@ -96,12 +109,14 @@ type Circle struct {
 	R float64 `svg:"r"`
 	Fillable
 	Strokeable
+	Draggable
 }
 
 func (se Circle) String() string {
 	s := `<circle r="` + jsString(se.R) + `" cx="` + jsString(se.X) + `" cy="` + jsString(se.Y) + `"`
 	s += se.Fillable.String()
 	s += se.Strokeable.String()
+	s += se.Draggable.String()
 	s += `" >` + unSupportMsg + `</circle>`
 	return s
 }
@@ -114,12 +129,14 @@ type Ellipse struct {
 	RY float64 `svg:"ry"`
 	Fillable
 	Strokeable
+	Draggable
 }
 
 func (se Ellipse) String() string {
 	s := `<ellipse rx="` + jsString(se.RX) + `" ry="` + jsString(se.RY) + `" cx="` + jsString(se.X) + `" cy="` + jsString(se.Y) + `"`
 	s += se.Fillable.String()
 	s += se.Strokeable.String()
+	s += se.Draggable.String()
 	s += `" >` + unSupportMsg + `</ellipse>`
 	return s
 }
@@ -131,11 +148,13 @@ type Line struct {
 	X2 float64 `svg:"x2"`
 	Y2 float64 `svg:"y2"`
 	Strokeable
+	Draggable
 }
 
 func (se Line) String() string {
 	s := `<line x1="` + jsString(se.X1) + `" y1="` + jsString(se.Y1) + `" x2="` + jsString(se.X2) + `" y2="` + jsString(se.Y2) + `"`
 	s += se.Strokeable.String()
+	s += se.Draggable.String()
 	s += `" >` + unSupportMsg + `</line>`
 	return s
 }
@@ -163,12 +182,14 @@ type Polygon struct {
 	Points Points `svg:"points"`
 	Fillable
 	Strokeable
+	Draggable
 }
 
 func (se Polygon) String() string {
 	s := `<polygon points="` + se.Points.String() + `"`
 	s += se.Fillable.String()
 	s += se.Strokeable.String()
+	s += se.Draggable.String()
 	s += `" >` + unSupportMsg + `</polygon>`
 	return s
 }
@@ -178,12 +199,14 @@ type Polyline struct {
 	Points Points `svg:"points"`
 	Fillable
 	Strokeable
+	Draggable
 }
 
 func (se Polyline) String() string {
 	s := `<polyline points="` + se.Points.String() + `"`
 	s += se.Fillable.String()
 	s += se.Strokeable.String()
+	s += se.Draggable.String()
 	s += `" >` + unSupportMsg + `</polyline>`
 	return s
 }
@@ -221,6 +244,7 @@ type Path struct {
 	D PathItems `svg:"d"`
 	Fillable
 	Strokeable
+	Draggable
 }
 
 func (ps PathItems) String() string {
@@ -241,6 +265,7 @@ func (se Path) String() string {
 	s := `<path d="` + se.D.String() + `"`
 	s += se.Fillable.String()
 	s += se.Strokeable.String()
+	s += se.Draggable.String()
 	s += `" >` + unSupportMsg + `</path>`
 	return s
 }
@@ -251,12 +276,14 @@ type Text struct {
 	Y       float64 `svg:"y"`
 	Fillable
 	Strokeable
+	Draggable
 }
 
 func (se Text) String() string {
 	s := `<text x="` + jsString(se.X) + `" y="` + jsString(se.Y) + `"`
 	s += se.Fillable.String()
 	s += se.Strokeable.String()
+	s += se.Draggable.String()
 	s += `" >` + se.Content + `</text>`
 	return s
 }
@@ -265,12 +292,14 @@ type Group struct {
 	Content []SvgElement `svg:"content"`
 	Fillable
 	Strokeable
+	Draggable
 }
 
 func (se Group) String() string {
 	s := `<g `
 	s += se.Fillable.String()
 	s += se.Strokeable.String()
+	s += se.Draggable.String()
 	s += `" >`
 	for _, v := range se.Content {
 		s += v.String()

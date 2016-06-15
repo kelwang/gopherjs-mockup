@@ -12,7 +12,7 @@ var basePath = "github.com/kelwang/gopherjs-mockup/"
 
 // Default Request Handler
 func defaultHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, `<html><head><title>GopherJS Mockup</title></head><body><script src="/mockup/script/script.js"></script></body></html>`)
+	fmt.Fprint(w, `<html><head><title>GopherJS Mockup</title></head><body><script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script><script src="/mockup/script/script.js"></script></body></html>`)
 }
 
 func main() {

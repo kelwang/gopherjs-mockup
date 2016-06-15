@@ -85,6 +85,9 @@ func NewTextBox(w, h, x, y float64, content string) *textBox {
 
 func (ele *textBox) Svg() svg.Group {
 	return svg.Group{
+		Draggable: svg.Draggable{
+			Draggable: true,
+		},
 		Content: []svg.SvgElement{
 			&svg.Rect{
 				Width:  ele.BaseElement.Dimension.Width,
@@ -141,6 +144,9 @@ func NewButton(w, h, x, y float64, content string) *button {
 
 func (ele *button) Svg() svg.Group {
 	return svg.Group{
+		Draggable: svg.Draggable{
+			Draggable: true,
+		},
 		Content: []svg.SvgElement{
 			&svg.Rect{
 				Width:  ele.BaseElement.Dimension.Width,
@@ -200,6 +206,9 @@ func (ele *box) Svg() *svg.Rect {
 			Stroke:      ele.Stroke.Color,
 			StrokeWidth: ele.Stroke.Thickness.Float64(),
 		},
+		Draggable: svg.Draggable{
+			Draggable: true,
+		},
 	}
 }
 
@@ -232,6 +241,9 @@ func (ele *label) Svg() *svg.Text {
 			Stroke:      ele.Text.Color,
 			StrokeWidth: ele.Stroke.Thickness.Float64(),
 		},
+		Draggable: svg.Draggable{
+			Draggable: true,
+		},
 	}
 }
 
@@ -259,6 +271,9 @@ func (ele *line) Svg() *svg.Line {
 		Strokeable: svg.Strokeable{
 			Stroke:      DARKGREY,
 			StrokeWidth: ele.Stroke.Thickness.Float64(),
+		},
+		Draggable: svg.Draggable{
+			Draggable: true,
 		},
 	}
 }
