@@ -63,9 +63,21 @@ func (se *Rect) String() string {
 	return s
 }
 
+type StrokeLineCap int
+
+const (
+	BUTT StrokeLineCap = iota
+	ROUND
+	SQUARE
+)
+
+var strokeLineCapString = []string{"butt", "round", "square"}
+
 type Strokeable struct {
-	StrokeWidth float64 `svg:"stroke-width"`
-	Stroke      string  `svg:"stroke"`
+	StrokeWidth     float64       `svg:"stroke-width"`
+	Stroke          string        `svg:"stroke"`
+	StrokeDashArray []int         `svg:"stroke-dasharray"`
+	StrokeLineCap   StrokeLineCap `svg:"stroke-linecap"`
 }
 
 func (se Strokeable) String() string {
@@ -76,6 +88,22 @@ func (se Strokeable) String() string {
 	if se.StrokeWidth != 0 {
 		s += ` stroke-width="` + jsString(se.StrokeWidth) + `"`
 	}
+
+	if se.StrokeDashArray != nil && len(se.StrokeDashArray) > 0 {
+		s += ` stroke-dasharray="`
+		for k, v := range se.StrokeDashArray {
+			if k != 0 {
+				s += ","
+			}
+			s += jsString(v)
+		}
+		s += `"`
+	}
+
+	if se.StrokeLineCap != BUTT {
+		s += ` stroke-linecap="` + strokeLineCapString[se.StrokeLineCap] + `"`
+	}
+
 	return s
 }
 

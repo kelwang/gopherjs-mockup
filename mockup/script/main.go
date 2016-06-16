@@ -13,8 +13,11 @@ func main() {
 	container := initPanel()
 	container.Content = initToolBar(container)
 
-	label1 := mockup.NewLabel(60, 60, 400, 150, "label")
-	container.Content = append(container.Content, label1.Svg())
+	label1 := mockup.NewLabel(60, 60, 400, 150, "big text a lal ha", true)
+	label2 := mockup.NewLabel(60, 60, 400, 450, "label2", true)
+	container.Content = append(container.Content,
+		label1.Svg(),
+		label2.Svg())
 
 	enableControl()
 	js.Global.Get("document").Call("write", container.String())
@@ -22,35 +25,14 @@ func main() {
 }
 
 func enableControl() {
-	println("control")
-	movable := false
-	jQuery(js.Global.Get("document")).On(jquery.MOUSEDOWN, ".draggable", func(e jquery.Event) {
-		movable = true
-		current := jQuery(e.CurrentTarget)
-		current.SetCss("cursor", "move")
-		jQuery(js.Global.Get("document")).On(jquery.MOUSEMOVE, func(e jquery.Event) {
-			if movable {
-				current.SetAttr("x", e.Get("clientX").Float())
-				current.SetAttr("y", e.Get("clientY").Float())
-			}
-		})
-	})
-	jQuery(js.Global.Get("document")).On(jquery.MOUSEUP, ".draggable", func(e jquery.Event) {
-		movable = false
-		jQuery(e.CurrentTarget).SetCss("cursor", "auto")
-
-	})
-}
-
-func stopDrag(e jquery.Event) {
-
+	mockup.NewDraggable(jQuery(nil), 260, 5, 1260, 805).BindEvents()
 }
 
 func initToolBar(container svg.Svg) []svg.SvgElement {
 	textboxTool := mockup.NewTextBox(60, 20, 30, 20, "textbox")
 	buttonTool := mockup.NewButton(60, 20, 150, 20, "button")
 	boxTool := mockup.NewBox(60, 60, 30, 60)
-	labelTool := mockup.NewLabel(60, 20, 160, 90, "label")
+	labelTool := mockup.NewLabel(60, 20, 160, 90, "label", false)
 	lineTool := mockup.NewLine(60, 0, 30, 160)
 	return append(container.Content,
 		textboxTool.Svg(),

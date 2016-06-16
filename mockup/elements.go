@@ -216,9 +216,10 @@ type label struct {
 	BaseElement
 	Text
 	Stroke
+	Draggable bool
 }
 
-func NewLabel(w, h, x, y float64, content string) *label {
+func NewLabel(w, h, x, y float64, content string, draggable bool) *label {
 	return &label{
 		BaseElement: newBaseElement(w, h, x, y),
 		Text: Text{
@@ -229,6 +230,7 @@ func NewLabel(w, h, x, y float64, content string) *label {
 			Thickness: Medium,
 			Color:     DARKGREY,
 		},
+		Draggable: draggable,
 	}
 }
 
@@ -242,7 +244,7 @@ func (ele *label) Svg() *svg.Text {
 			StrokeWidth: ele.Stroke.Thickness.Float64(),
 		},
 		Draggable: svg.Draggable{
-			Draggable: true,
+			Draggable: ele.Draggable,
 		},
 	}
 }
