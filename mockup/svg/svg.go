@@ -76,7 +76,7 @@ var strokeLineCapString = []string{"butt", "round", "square"}
 type Strokeable struct {
 	StrokeWidth     float64       `svg:"stroke-width"`
 	Stroke          string        `svg:"stroke"`
-	StrokeDashArray []int         `svg:"stroke-dasharray"`
+	StrokeDashArray []float64     `svg:"stroke-dasharray"`
 	StrokeLineCap   StrokeLineCap `svg:"stroke-linecap"`
 }
 
