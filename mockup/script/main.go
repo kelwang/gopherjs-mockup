@@ -13,11 +13,16 @@ func main() {
 	container := initPanel()
 	container.Content = initToolBar(container)
 
-	label1 := mockup.NewLabel(60, 60, 400, 150, "big text a lal ha", true)
+	label1 := mockup.NewLabel(160, 60, 400, 150, "big text a lal ha", false)
 	label2 := mockup.NewLabel(60, 60, 400, 450, "label2", true)
+
+	border1 := mockup.NewScaleBox(label1)
+
 	container.Content = append(container.Content,
-		label1.Svg(),
-		label2.Svg())
+		//label1.Svg(),
+		label2.Svg(),
+		border1.Svg(),
+	)
 
 	enableControl()
 	js.Global.Get("document").Call("write", container.String())
@@ -25,7 +30,7 @@ func main() {
 }
 
 func enableControl() {
-	mockup.NewDraggable(jQuery(nil), 260, 5, 1260, 805).BindEvents()
+	mockup.NewDraggable(mockup.MovableNil, 260, 5, 1260, 805).BindEvents()
 }
 
 func initToolBar(container svg.Svg) []svg.SvgElement {
@@ -50,23 +55,19 @@ func initPanel() svg.Svg {
 		Content: []svg.SvgElement{
 			//left toolbar
 			&svg.Rect{
-				Width:  250,
-				Height: 800,
-				X:      5,
-				Y:      5,
-				Fillable: svg.Fillable{
-					Fill: "#F1F1F1",
-				},
+				Width:    250,
+				Height:   800,
+				X:        5,
+				Y:        5,
+				Fillable: svg.NewFillable("#F1F1F1", 1),
 			},
 			//main convas
 			&svg.Rect{
-				Width:  1000,
-				Height: 800,
-				X:      260,
-				Y:      5,
-				Fillable: svg.Fillable{
-					Fill: "#F1F1F1",
-				},
+				Width:    1000,
+				Height:   800,
+				X:        260,
+				Y:        5,
+				Fillable: svg.NewFillable("#F1F1F1", 1),
 			},
 		},
 	}

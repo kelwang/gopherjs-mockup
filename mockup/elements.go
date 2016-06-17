@@ -14,9 +14,18 @@ type Dimension struct {
 	Height float64
 }
 
+type MockupElement interface {
+	Svg() svg.SvgElement
+	GetWHXY() (float64, float64, float64, float64)
+}
+
 type BaseElement struct {
 	Position  Position
 	Dimension Dimension
+}
+
+func (be BaseElement) GetWHXY() (float64, float64, float64, float64) {
+	return be.Dimension.Width, be.Dimension.Height, be.Position.X, be.Position.Y
 }
 
 func newBaseElement(width, height, x, y float64) BaseElement {
@@ -83,20 +92,18 @@ func NewTextBox(w, h, x, y float64, content string) *textBox {
 	}
 }
 
-func (ele *textBox) Svg() svg.Group {
+func (ele *textBox) Svg() svg.SvgElement {
 	return svg.Group{
 		Draggable: svg.Draggable{
 			Draggable: true,
 		},
 		Content: []svg.SvgElement{
 			&svg.Rect{
-				Width:  ele.BaseElement.Dimension.Width,
-				Height: ele.BaseElement.Dimension.Height,
-				X:      ele.BaseElement.Position.X,
-				Y:      ele.BaseElement.Position.Y,
-				Fillable: svg.Fillable{
-					Fill: WHITE,
-				},
+				Width:    ele.BaseElement.Dimension.Width,
+				Height:   ele.BaseElement.Dimension.Height,
+				X:        ele.BaseElement.Position.X,
+				Y:        ele.BaseElement.Position.Y,
+				Fillable: svg.NewFillable(WHITE, 1),
 				Strokeable: svg.Strokeable{
 					Stroke:      ele.Stroke.Color,
 					StrokeWidth: ele.Stroke.Thickness.Float64(),
@@ -142,22 +149,20 @@ func NewButton(w, h, x, y float64, content string) *button {
 	}
 }
 
-func (ele *button) Svg() svg.Group {
+func (ele *button) Svg() svg.SvgElement {
 	return svg.Group{
 		Draggable: svg.Draggable{
 			Draggable: true,
 		},
 		Content: []svg.SvgElement{
 			&svg.Rect{
-				Width:  ele.BaseElement.Dimension.Width,
-				Height: ele.BaseElement.Dimension.Height,
-				X:      ele.BaseElement.Position.X,
-				Y:      ele.BaseElement.Position.Y,
-				RX:     min(ele.BaseElement.Dimension.Width, ele.BaseElement.Dimension.Height) / 4,
-				RY:     min(ele.BaseElement.Dimension.Width, ele.BaseElement.Dimension.Height) / 4,
-				Fillable: svg.Fillable{
-					Fill: WHITE,
-				},
+				Width:    ele.BaseElement.Dimension.Width,
+				Height:   ele.BaseElement.Dimension.Height,
+				X:        ele.BaseElement.Position.X,
+				Y:        ele.BaseElement.Position.Y,
+				RX:       min(ele.BaseElement.Dimension.Width, ele.BaseElement.Dimension.Height) / 4,
+				RY:       min(ele.BaseElement.Dimension.Width, ele.BaseElement.Dimension.Height) / 4,
+				Fillable: svg.NewFillable(WHITE, 1),
 				Strokeable: svg.Strokeable{
 					Stroke:      ele.Stroke.Color,
 					StrokeWidth: ele.Stroke.Thickness.Float64(),
@@ -191,17 +196,15 @@ func NewBox(w, h, x, y float64) *box {
 	}
 }
 
-func (ele *box) Svg() *svg.Rect {
+func (ele *box) Svg() svg.SvgElement {
 	return &svg.Rect{
-		Width:  ele.BaseElement.Dimension.Width,
-		Height: ele.BaseElement.Dimension.Height,
-		X:      ele.BaseElement.Position.X,
-		Y:      ele.BaseElement.Position.Y,
-		RX:     min(ele.BaseElement.Dimension.Width, ele.BaseElement.Dimension.Height) / 8,
-		RY:     min(ele.BaseElement.Dimension.Width, ele.BaseElement.Dimension.Height) / 8,
-		Fillable: svg.Fillable{
-			Fill: WHITE,
-		},
+		Width:    ele.BaseElement.Dimension.Width,
+		Height:   ele.BaseElement.Dimension.Height,
+		X:        ele.BaseElement.Position.X,
+		Y:        ele.BaseElement.Position.Y,
+		RX:       min(ele.BaseElement.Dimension.Width, ele.BaseElement.Dimension.Height) / 8,
+		RY:       min(ele.BaseElement.Dimension.Width, ele.BaseElement.Dimension.Height) / 8,
+		Fillable: svg.NewFillable(WHITE, 1),
 		Strokeable: svg.Strokeable{
 			Stroke:      ele.Stroke.Color,
 			StrokeWidth: ele.Stroke.Thickness.Float64(),
@@ -234,7 +237,7 @@ func NewLabel(w, h, x, y float64, content string, draggable bool) *label {
 	}
 }
 
-func (ele *label) Svg() *svg.Text {
+func (ele *label) Svg() svg.SvgElement {
 	return &svg.Text{
 		Content: ele.Text.Content,
 		X:       ele.BaseElement.Position.X,
@@ -264,7 +267,7 @@ func NewLine(w, h, x, y float64) *line {
 	}
 }
 
-func (ele *line) Svg() *svg.Line {
+func (ele *line) Svg() svg.SvgElement {
 	return &svg.Line{
 		X1: ele.BaseElement.Position.X,
 		Y1: ele.BaseElement.Position.Y,
@@ -276,6 +279,76 @@ func (ele *line) Svg() *svg.Line {
 		},
 		Draggable: svg.Draggable{
 			Draggable: true,
+		},
+	}
+}
+
+type ScaleBox struct {
+	MockupElement
+}
+
+func NewScaleBox(mockupElement MockupElement) *ScaleBox {
+	return &ScaleBox{
+		MockupElement: mockupElement,
+	}
+}
+
+func (ele *ScaleBox) Move(x, y float64) {
+
+}
+
+func (ele *ScaleBox) Svg() *svg.Group {
+	stroke_width := float64(2)
+	square_height := float64(8)
+	w, h, x, y := ele.MockupElement.GetWHXY()
+	x = x - w/4
+	y = y - w/4
+	w = w * 1.25
+	h = h * 1.25
+	return &svg.Group{
+		Content: []svg.SvgElement{
+			svg.Path{
+				D: []svg.PathItem{
+					{Action: svg.MOVETO, Point: svg.NewPoint(x, y)},
+					{Action: svg.LINETO, Point: svg.NewPoint(x, y+h)},
+					{Action: svg.LINETO, Point: svg.NewPoint(x+w, y+h)},
+					{Action: svg.LINETO, Point: svg.NewPoint(x+w, y)},
+					{Action: svg.CLOSEPATH},
+				},
+				Fillable: svg.NewFillable(WHITE, 0),
+				Strokeable: svg.Strokeable{
+					Stroke:          DARKGREY,
+					StrokeDashArray: []float64{square_height},
+					StrokeWidth:     stroke_width,
+				},
+			},
+			scaleboxRect(x-square_height/2, y-square_height/2, stroke_width, square_height),
+			scaleboxRect(x+w/2-square_height/2, y-square_height/2, stroke_width, square_height),
+			scaleboxRect(x-square_height/2, y+h/2-square_height/2, stroke_width, square_height),
+			scaleboxRect(x-square_height/2, y+h-square_height/2, stroke_width, square_height),
+			scaleboxRect(x+w-square_height/2, y-square_height/2, stroke_width, square_height),
+			scaleboxRect(x+w/2-square_height/2, y+h-square_height/2, stroke_width, square_height),
+			scaleboxRect(x+w-square_height/2, y+h/2-square_height/2, stroke_width, square_height),
+			scaleboxRect(x+w-square_height/2, y+h-square_height/2, stroke_width, square_height),
+			ele.MockupElement.Svg(),
+		},
+		Draggable: svg.Draggable{
+			Draggable: true,
+		},
+		Fillable: svg.NewFillable(WHITE, 1),
+	}
+}
+
+func scaleboxRect(x, y, stroke_width, square_height float64) svg.Rect {
+	return svg.Rect{
+		X:        x,
+		Y:        y,
+		Width:    square_height,
+		Height:   square_height,
+		Fillable: svg.NewFillable(WHITE, 1),
+		Strokeable: svg.Strokeable{
+			Stroke:      DARKGREY,
+			StrokeWidth: stroke_width,
 		},
 	}
 }

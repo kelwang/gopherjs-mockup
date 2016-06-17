@@ -43,12 +43,12 @@ type Rect struct {
 	RY     float64 `svg:"ry"`
 	Strokeable
 	Draggable
-	Fillable
+	Fillable fillable
 }
 
 var unSupportMsg = "Sorry, your browser does not support inline SVG."
 
-func (se *Rect) String() string {
+func (se Rect) String() string {
 	s := `<rect width="` + jsString(se.Width) + `" height="` + jsString(se.Height) + `" x="` + jsString(se.X) + `" y="` + jsString(se.Y) + `"`
 	s += se.Fillable.String()
 	s += se.Strokeable.String()
@@ -59,7 +59,7 @@ func (se *Rect) String() string {
 	if se.RY != 0 {
 		s += ` ry="` + jsString(se.RY) + `"`
 	}
-	s += `" >` + unSupportMsg + `</rect>`
+	s += ` >` + unSupportMsg + `</rect>`
 	return s
 }
 
@@ -118,24 +118,38 @@ func (draggable Draggable) String() string {
 	return ""
 }
 
-type Fillable struct {
-	Fill string `svg:"fill"`
+type fillable struct {
+	Fill    string  `svg:"fill"`
+	Opacity float64 `svg:"fill-opacity"`
 }
 
-func (se Fillable) String() string {
+func NewFillable(fill string, opacity float64) fillable {
+	return fillable{
+		Fill:    fill,
+		Opacity: opacity,
+	}
+}
+
+func (se fillable) String() string {
 	s := ""
+
 	if se.Fill != "" {
 		s += ` fill="` + jsString(se.Fill) + `"`
 	}
+
+	if se.Opacity != float64(1) {
+		s += ` fill-opacity="` + jsString(se.Opacity) + `"`
+	}
+
 	return s
 }
 
 //SvgElement
 type Circle struct {
-	X float64 `svg:"cx"`
-	Y float64 `svg:"cy"`
-	R float64 `svg:"r"`
-	Fillable
+	X        float64 `svg:"cx"`
+	Y        float64 `svg:"cy"`
+	R        float64 `svg:"r"`
+	Fillable fillable
 	Strokeable
 	Draggable
 }
@@ -145,17 +159,17 @@ func (se Circle) String() string {
 	s += se.Fillable.String()
 	s += se.Strokeable.String()
 	s += se.Draggable.String()
-	s += `" >` + unSupportMsg + `</circle>`
+	s += ` >` + unSupportMsg + `</circle>`
 	return s
 }
 
 //SvgElement
 type Ellipse struct {
-	X  float64 `svg:"cx"`
-	Y  float64 `svg:"cy"`
-	RX float64 `svg:"rx"`
-	RY float64 `svg:"ry"`
-	Fillable
+	X        float64 `svg:"cx"`
+	Y        float64 `svg:"cy"`
+	RX       float64 `svg:"rx"`
+	RY       float64 `svg:"ry"`
+	Fillable fillable
 	Strokeable
 	Draggable
 }
@@ -165,7 +179,7 @@ func (se Ellipse) String() string {
 	s += se.Fillable.String()
 	s += se.Strokeable.String()
 	s += se.Draggable.String()
-	s += `" >` + unSupportMsg + `</ellipse>`
+	s += ` >` + unSupportMsg + `</ellipse>`
 	return s
 }
 
@@ -183,13 +197,20 @@ func (se Line) String() string {
 	s := `<line x1="` + jsString(se.X1) + `" y1="` + jsString(se.Y1) + `" x2="` + jsString(se.X2) + `" y2="` + jsString(se.Y2) + `"`
 	s += se.Strokeable.String()
 	s += se.Draggable.String()
-	s += `" >` + unSupportMsg + `</line>`
+	s += ` >` + unSupportMsg + `</line>`
 	return s
 }
 
 type Point struct {
 	x float64
 	y float64
+}
+
+func NewPoint(x, y float64) Point {
+	return Point{
+		x: x,
+		y: y,
+	}
 }
 
 type Points []Point
@@ -207,8 +228,8 @@ func (p Points) String() string {
 
 //SvgElement
 type Polygon struct {
-	Points Points `svg:"points"`
-	Fillable
+	Points   Points `svg:"points"`
+	Fillable fillable
 	Strokeable
 	Draggable
 }
@@ -218,14 +239,14 @@ func (se Polygon) String() string {
 	s += se.Fillable.String()
 	s += se.Strokeable.String()
 	s += se.Draggable.String()
-	s += `" >` + unSupportMsg + `</polygon>`
+	s += ` >` + unSupportMsg + `</polygon>`
 	return s
 }
 
 //SvgElement
 type Polyline struct {
-	Points Points `svg:"points"`
-	Fillable
+	Points   Points `svg:"points"`
+	Fillable fillable
 	Strokeable
 	Draggable
 }
@@ -235,7 +256,7 @@ func (se Polyline) String() string {
 	s += se.Fillable.String()
 	s += se.Strokeable.String()
 	s += se.Draggable.String()
-	s += `" >` + unSupportMsg + `</polyline>`
+	s += ` >` + unSupportMsg + `</polyline>`
 	return s
 }
 
@@ -269,8 +290,8 @@ type PathItems []PathItem
 
 //SvgElement
 type Path struct {
-	D PathItems `svg:"d"`
-	Fillable
+	D        PathItems `svg:"d"`
+	Fillable fillable
 	Strokeable
 	Draggable
 }
@@ -294,15 +315,15 @@ func (se Path) String() string {
 	s += se.Fillable.String()
 	s += se.Strokeable.String()
 	s += se.Draggable.String()
-	s += `" >` + unSupportMsg + `</path>`
+	s += ` >` + unSupportMsg + `</path>`
 	return s
 }
 
 type Text struct {
-	Content string  `svg:"content"`
-	X       float64 `svg:"x"`
-	Y       float64 `svg:"y"`
-	Fillable
+	Content  string  `svg:"content"`
+	X        float64 `svg:"x"`
+	Y        float64 `svg:"y"`
+	Fillable fillable
 	Strokeable
 	Draggable
 }
@@ -312,13 +333,13 @@ func (se Text) String() string {
 	s += se.Fillable.String()
 	s += se.Strokeable.String()
 	s += se.Draggable.String()
-	s += `" >` + se.Content + `</text>`
+	s += ` >` + se.Content + `</text>`
 	return s
 }
 
 type Group struct {
-	Content []SvgElement `svg:"content"`
-	Fillable
+	Content  []SvgElement `svg:"content"`
+	Fillable fillable
 	Strokeable
 	Draggable
 }
@@ -328,7 +349,7 @@ func (se Group) String() string {
 	s += se.Fillable.String()
 	s += se.Strokeable.String()
 	s += se.Draggable.String()
-	s += `" >`
+	s += ` >`
 	for _, v := range se.Content {
 		s += v.String()
 	}
