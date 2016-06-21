@@ -59,7 +59,7 @@ type Rect struct {
 	RY     float64 `svg:"ry"`
 	Idable
 	Strokeable
-	Draggable
+	Editable
 	Fillable fillable
 }
 
@@ -70,7 +70,7 @@ func (se *Rect) String() string {
 	s += se.Idable.String()
 	s += se.Fillable.String()
 	s += se.Strokeable.String()
-	s += se.Draggable.String()
+	s += se.Editable.String()
 	if se.RX != 0 {
 		s += ` rx="` + jsString(se.RX) + `"`
 	}
@@ -91,7 +91,7 @@ func (se *Rect) Jq() jquery.JQuery {
 	attr = mergeAttr(attr, se.Idable.Attr())
 	attr = mergeAttr(attr, se.Fillable.Attr())
 	attr = mergeAttr(attr, se.Strokeable.Attr())
-	attr = mergeAttr(attr, se.Draggable.Attr())
+	attr = mergeAttr(attr, se.Editable.Attr())
 	if se.RX != 0 {
 		attr["rx"] = se.RX
 	}
@@ -181,19 +181,19 @@ func (se Strokeable) Attr() js.M {
 	return attr
 }
 
-type Draggable struct {
+type Editable struct {
 	Draggable bool
 }
 
-func (draggable Draggable) String() string {
-	if draggable.Draggable {
+func (editable Editable) String() string {
+	if editable.Draggable {
 		return ` class="draggable"`
 	}
 	return ""
 }
 
-func (draggable Draggable) Attr() js.M {
-	if draggable.Draggable {
+func (editable Editable) Attr() js.M {
+	if editable.Draggable {
 		return js.M{"class": "draggable"}
 	}
 	return js.M{}
@@ -264,14 +264,14 @@ type Circle struct {
 	R        float64 `svg:"r"`
 	Fillable fillable
 	Strokeable
-	Draggable
+	Editable
 }
 
 func (se Circle) String() string {
 	s := `<circle r="` + jsString(se.R) + `" cx="` + jsString(se.X) + `" cy="` + jsString(se.Y) + `"`
 	s += se.Fillable.String()
 	s += se.Strokeable.String()
-	s += se.Draggable.String()
+	s += se.Editable.String()
 	s += ` >` + unSupportMsg + `</circle>`
 	return s
 }
@@ -284,14 +284,14 @@ type Ellipse struct {
 	RY       float64 `svg:"ry"`
 	Fillable fillable
 	Strokeable
-	Draggable
+	Editable
 }
 
 func (se Ellipse) String() string {
 	s := `<ellipse rx="` + jsString(se.RX) + `" ry="` + jsString(se.RY) + `" cx="` + jsString(se.X) + `" cy="` + jsString(se.Y) + `"`
 	s += se.Fillable.String()
 	s += se.Strokeable.String()
-	s += se.Draggable.String()
+	s += se.Editable.String()
 	s += ` >` + unSupportMsg + `</ellipse>`
 	return s
 }
@@ -303,7 +303,7 @@ type Line struct {
 	X2 float64 `svg:"x2"`
 	Y2 float64 `svg:"y2"`
 	Strokeable
-	Draggable
+	Editable
 	Idable
 }
 
@@ -311,7 +311,7 @@ func (se *Line) String() string {
 	s := `<line x1="` + jsString(se.X1) + `" y1="` + jsString(se.Y1) + `" x2="` + jsString(se.X2) + `" y2="` + jsString(se.Y2) + `"`
 	s += se.Idable.String()
 	s += se.Strokeable.String()
-	s += se.Draggable.String()
+	s += se.Editable.String()
 	s += ` >` + unSupportMsg + `</line>`
 	return s
 }
@@ -325,7 +325,7 @@ func (se *Line) Jq() jquery.JQuery {
 	}
 	attr = mergeAttr(attr, se.Idable.Attr())
 	attr = mergeAttr(attr, se.Strokeable.Attr())
-	attr = mergeAttr(attr, se.Draggable.Attr())
+	attr = mergeAttr(attr, se.Editable.Attr())
 	return initJq("line").SetAttr(attr)
 }
 
@@ -336,6 +336,12 @@ func (se *Line) MoveTo(x, y float64) {
 	se.Y1 = y
 	se.X2 += dx
 	se.Y2 += dy
+	jQuery("#" + se.ID).SetAttr(js.M{
+		"x1": se.X1,
+		"y1": se.Y1,
+		"x2": se.X2,
+		"y2": se.Y2,
+	})
 }
 
 type Point struct {
@@ -368,14 +374,14 @@ type Polygon struct {
 	Points   Points `svg:"points"`
 	Fillable fillable
 	Strokeable
-	Draggable
+	Editable
 }
 
 func (se Polygon) String() string {
 	s := `<polygon points="` + se.Points.String() + `"`
 	s += se.Fillable.String()
 	s += se.Strokeable.String()
-	s += se.Draggable.String()
+	s += se.Editable.String()
 	s += ` >` + unSupportMsg + `</polygon>`
 	return s
 }
@@ -385,14 +391,14 @@ type Polyline struct {
 	Points   Points `svg:"points"`
 	Fillable fillable
 	Strokeable
-	Draggable
+	Editable
 }
 
 func (se Polyline) String() string {
 	s := `<polyline points="` + se.Points.String() + `"`
 	s += se.Fillable.String()
 	s += se.Strokeable.String()
-	s += se.Draggable.String()
+	s += se.Editable.String()
 	s += ` >` + unSupportMsg + `</polyline>`
 	return s
 }
@@ -430,7 +436,7 @@ type Path struct {
 	D        PathItems `svg:"d"`
 	Fillable fillable
 	Strokeable
-	Draggable
+	Editable
 	Idable
 }
 
@@ -453,7 +459,7 @@ func (se *Path) String() string {
 	s += se.Idable.String()
 	s += se.Fillable.String()
 	s += se.Strokeable.String()
-	s += se.Draggable.String()
+	s += se.Editable.String()
 	s += ` >` + unSupportMsg + `</path>`
 	return s
 }
@@ -464,7 +470,7 @@ func (se *Path) Jq() jquery.JQuery {
 	}
 	attr = mergeAttr(attr, se.Fillable.Attr())
 	attr = mergeAttr(attr, se.Strokeable.Attr())
-	attr = mergeAttr(attr, se.Draggable.Attr())
+	attr = mergeAttr(attr, se.Editable.Attr())
 
 	return initJq("path").SetAttr(attr)
 }
@@ -485,7 +491,7 @@ type Text struct {
 	Y        float64 `svg:"y"`
 	Fillable fillable
 	Strokeable
-	Draggable
+	Editable
 	Idable
 }
 
@@ -494,7 +500,7 @@ func (se *Text) String() string {
 	s += se.Idable.String()
 	s += se.Fillable.String()
 	s += se.Strokeable.String()
-	s += se.Draggable.String()
+	s += se.Editable.String()
 	s += ` >` + se.Content + `</text>`
 	return s
 }
@@ -507,7 +513,7 @@ func (se *Text) Jq() jquery.JQuery {
 	attr = mergeAttr(attr, se.Idable.Attr())
 	attr = mergeAttr(attr, se.Fillable.Attr())
 	attr = mergeAttr(attr, se.Strokeable.Attr())
-	attr = mergeAttr(attr, se.Draggable.Attr())
+	attr = mergeAttr(attr, se.Editable.Attr())
 	return initJq("text").SetAttr(attr).SetHtml(se.Content)
 }
 
@@ -526,7 +532,7 @@ type Group struct {
 	Idable
 	Fillable fillable
 	Strokeable
-	Draggable
+	Editable
 }
 
 func (se *Group) String() string {
@@ -534,7 +540,7 @@ func (se *Group) String() string {
 	s += se.Idable.String()
 	s += se.Fillable.String()
 	s += se.Strokeable.String()
-	s += se.Draggable.String()
+	s += se.Editable.String()
 	s += ` >`
 	for _, v := range se.Content {
 		s += v.String()
@@ -548,7 +554,7 @@ func (se *Group) Jq() jquery.JQuery {
 	attr = mergeAttr(attr, se.Idable.Attr())
 	attr = mergeAttr(attr, se.Fillable.Attr())
 	attr = mergeAttr(attr, se.Strokeable.Attr())
-	attr = mergeAttr(attr, se.Draggable.Attr())
+	attr = mergeAttr(attr, se.Editable.Attr())
 	s := ""
 	for _, v := range se.Content {
 		s += v.String()
@@ -558,7 +564,4 @@ func (se *Group) Jq() jquery.JQuery {
 
 func (se *Group) MoveTo(x, y float64) {
 	//do nothing
-	//for k := range se.Content {
-	//	se.Content[k].MoveTo(x, y)
-	//}
 }

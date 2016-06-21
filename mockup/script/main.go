@@ -13,20 +13,32 @@ func main() {
 	container := initPanel()
 	container.Content = initToolBar(container)
 
-	label1 := mockup.NewLabel(160, 60, 400, 150, "big text a lal ha", "E1", false)
-	label2 := mockup.NewLabel(60, 60, 400, 450, "label2", "E2", true)
+	label1 := mockup.NewLabel(180, 20, 400, 158, "big text a lal ha", "E1", false)
+	textbox1 := mockup.NewTextBox(160, 40, 400, 300, "textbox 1", "E2")
+	button1 := mockup.NewButton(160, 40, 400, 500, "button 1", "E3")
+	box1 := mockup.NewBox(100, 100, 800, 158, "E4")
+	line1 := mockup.NewLine(100, 10, 800, 400, "E5")
 
 	border1 := mockup.NewScaleBox(label1)
+	border2 := mockup.NewScaleBox(textbox1)
+	border3 := mockup.NewScaleBox(button1)
+	border4 := mockup.NewScaleBox(box1)
+	border5 := mockup.NewScaleBox(line1)
 
 	container.Content = append(container.Content,
-		//label1.Svg(),
-		label2.Svg(),
 		border1.Svg(),
+		border2.Svg(),
+		border3.Svg(),
+		border4.Svg(),
+		border5.Svg(),
 	)
 
 	m := map[string]mockup.MockupElement{
 		"M_E1": border1,
-		"E2":   label2,
+		"M_E2": border2,
+		"M_E3": border3,
+		"M_E4": border4,
+		"M_E5": border5,
 	}
 
 	enableControl(m)

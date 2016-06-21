@@ -106,7 +106,7 @@ func NewTextBox(w, h, x, y float64, content string, id string) *textBox {
 
 func (ele *textBox) Svg() svg.SvgElement {
 	return &svg.Group{
-		Draggable: svg.Draggable{
+		Editable: svg.Editable{
 			Draggable: true,
 		},
 		Idable: svg.Idable{
@@ -123,6 +123,7 @@ func (ele *textBox) Svg() svg.SvgElement {
 					Stroke:      ele.Stroke.Color,
 					StrokeWidth: ele.Stroke.Thickness.Float64(),
 				},
+				Idable: svg.Idable{ID: ele.idable.id + "_outter"},
 			},
 			&svg.Text{
 				Content: ele.Text.Content,
@@ -132,9 +133,18 @@ func (ele *textBox) Svg() svg.SvgElement {
 					Stroke:      ele.Text.Color,
 					StrokeWidth: ele.Stroke.Thickness.Float64(),
 				},
+				Idable: svg.Idable{ID: ele.idable.id + "_inner"},
 			},
 		},
 	}
+}
+
+func (ele *textBox) MoveTo(x, y float64) {
+	w, h, _, _ := ele.GetWHXY()
+	content := ele.Svg().(*svg.Group).Content
+
+	content[0].MoveTo(x+w/3, y+h/3)
+	content[1].MoveTo(x+w/3+w/2-float64(7*len(ele.Text.Content))/2, y+h/3+(h+7)/2)
 }
 
 func min(a, b float64) float64 {
@@ -169,9 +179,9 @@ func NewButton(w, h, x, y float64, content string, id string) *button {
 func (ele *button) Svg() svg.SvgElement {
 	return &svg.Group{
 		Idable: svg.Idable{
-			ID: ele.id,
+			ID: ele.idable.id,
 		},
-		Draggable: svg.Draggable{
+		Editable: svg.Editable{
 			Draggable: true,
 		},
 		Content: []svg.SvgElement{
@@ -187,6 +197,9 @@ func (ele *button) Svg() svg.SvgElement {
 					Stroke:      ele.Stroke.Color,
 					StrokeWidth: ele.Stroke.Thickness.Float64(),
 				},
+				Idable: svg.Idable{
+					ID: ele.idable.id + "_outer",
+				},
 			},
 			&svg.Text{
 				Content: ele.Text.Content,
@@ -196,9 +209,20 @@ func (ele *button) Svg() svg.SvgElement {
 					Stroke:      ele.Text.Color,
 					StrokeWidth: ele.Stroke.Thickness.Float64(),
 				},
+				Idable: svg.Idable{
+					ID: ele.idable.id + "_inner",
+				},
 			},
 		},
 	}
+}
+
+func (ele *button) MoveTo(x, y float64) {
+	w, h, _, _ := ele.GetWHXY()
+	content := ele.Svg().(*svg.Group).Content
+
+	content[0].MoveTo(x+w/3, y+h/3)
+	content[1].MoveTo(x+w/3+w/2-float64(7*len(ele.Text.Content))/2, y+h/3+(h+7)/2)
 }
 
 type box struct {
@@ -231,13 +255,18 @@ func (ele *box) Svg() svg.SvgElement {
 			Stroke:      ele.Stroke.Color,
 			StrokeWidth: ele.Stroke.Thickness.Float64(),
 		},
-		Draggable: svg.Draggable{
+		Editable: svg.Editable{
 			Draggable: true,
 		},
 		Idable: svg.Idable{
 			ID: ele.id,
 		},
 	}
+}
+
+func (ele *box) MoveTo(x, y float64) {
+	w, h, _, _ := ele.GetWHXY()
+	ele.Svg().MoveTo(x+w/3, y+h/3)
 }
 
 type label struct {
@@ -265,25 +294,42 @@ func NewLabel(w, h, x, y float64, content string, id string, draggable bool) *la
 }
 
 func (ele *label) Svg() svg.SvgElement {
-	return &svg.Text{
-		Content: ele.Text.Content,
-		X:       ele.BaseElement.Position.X,
-		Y:       ele.BaseElement.Position.Y,
-		Strokeable: svg.Strokeable{
-			Stroke:      ele.Text.Color,
-			StrokeWidth: ele.Stroke.Thickness.Float64(),
-		},
-		Draggable: svg.Draggable{
-			Draggable: ele.Draggable,
+	return &svg.Group{
+		Editable: svg.Editable{
+			Draggable: true,
 		},
 		Idable: svg.Idable{
 			ID: ele.id,
+		},
+		Content: []svg.SvgElement{
+			&svg.Rect{
+				Width:    ele.BaseElement.Dimension.Width,
+				Height:   ele.BaseElement.Dimension.Height,
+				X:        ele.BaseElement.Position.X,
+				Y:        ele.BaseElement.Position.Y,
+				Fillable: svg.NewFillable(WHITE, 0),
+				Idable:   svg.Idable{ID: ele.idable.id + "_outter"},
+			},
+			&svg.Text{
+				Content: ele.Text.Content,
+				X:       ele.BaseElement.Position.X + (ele.BaseElement.Dimension.Width-float64(7*len(ele.Text.Content)))/2,
+				Y:       ele.BaseElement.Position.Y + (ele.BaseElement.Dimension.Height+7)/2,
+				Strokeable: svg.Strokeable{
+					Stroke:      ele.Text.Color,
+					StrokeWidth: ele.Stroke.Thickness.Float64(),
+				},
+				Idable: svg.Idable{ID: ele.idable.id + "_inner"},
+			},
 		},
 	}
 }
 
 func (ele *label) MoveTo(x, y float64) {
-	ele.Svg().MoveTo(x, y)
+	w, h, _, _ := ele.GetWHXY()
+	content := ele.Svg().(*svg.Group).Content
+
+	content[0].MoveTo(x+w/3, y+h/3)
+	content[1].MoveTo(x+w/3+w/2-float64(7*len(ele.Text.Content))/2, y+h/3+(h+7)/2)
 }
 
 type line struct {
@@ -313,13 +359,18 @@ func (ele *line) Svg() svg.SvgElement {
 			Stroke:      DARKGREY,
 			StrokeWidth: ele.Stroke.Thickness.Float64(),
 		},
-		Draggable: svg.Draggable{
+		Editable: svg.Editable{
 			Draggable: true,
 		},
 		Idable: svg.Idable{
 			ID: ele.id,
 		},
 	}
+}
+
+func (ele *line) MoveTo(x, y float64) {
+	svg := ele.Svg().(*svg.Line)
+	ele.Svg().MoveTo(x+(svg.X2-svg.X1)/3, y+(svg.Y2-svg.Y1)/3)
 }
 
 type ScaleBox struct {
@@ -341,11 +392,10 @@ func (ele *ScaleBox) Id() string {
 func (ele *ScaleBox) MoveTo(x, y float64) {
 	content := ele.Svg().(*svg.Group).Content
 	w, h, _, _ := ele.MockupElement.GetWHXY()
-	x = x - w/4
-	y = y - w/4
-	w = w * 1.25
-	h = h * 1.25
-	square_height := float64(8)
+	x = x - w/3
+	y = y - h/3
+	w = w * 1.67
+	h = h * 1.67
 	content[0].MoveTo(x, y)
 	content[1].MoveTo(x-square_height/2, y-square_height/2)
 	content[2].MoveTo(x+w/2-square_height/2, y-square_height/2)
@@ -356,17 +406,19 @@ func (ele *ScaleBox) MoveTo(x, y float64) {
 	content[7].MoveTo(x+w-square_height/2, y+h/2-square_height/2)
 	content[8].MoveTo(x+w-square_height/2, y+h-square_height/2)
 
-	//content[9].MoveTo(x+w/2, y+h/2)
+	ele.MockupElement.MoveTo(x, y)
 }
 
+var stroke_width = float64(2)
+var square_height = float64(8)
+
 func (ele *ScaleBox) Svg() svg.SvgElement {
-	stroke_width := float64(2)
-	square_height := float64(8)
+
 	w, h, x, y := ele.MockupElement.GetWHXY()
-	x = x - w/4
-	y = y - w/4
-	w = w * 1.25
-	h = h * 1.25
+	x = x - w/3
+	y = y - h/3
+	w = w * 1.67
+	h = h * 1.67
 	return &svg.Group{
 		Content: []svg.SvgElement{
 			&svg.Path{
@@ -397,7 +449,7 @@ func (ele *ScaleBox) Svg() svg.SvgElement {
 			scaleboxRect(x+w-square_height/2, y+h-square_height/2, stroke_width, square_height, ele.idable.id+"_sq8"),
 			ele.MockupElement.Svg(),
 		},
-		Draggable: svg.Draggable{
+		Editable: svg.Editable{
 			Draggable: true,
 		},
 		Fillable: svg.NewFillable(WHITE, 1),
