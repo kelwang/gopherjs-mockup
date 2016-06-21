@@ -2,7 +2,10 @@ package svg
 
 import (
 	"github.com/gopherjs/gopherjs/js"
+	"github.com/gopherjs/jquery"
 )
+
+var jQuery = jquery.NewJQuery
 
 type Svg struct {
 	Width   float64
@@ -20,6 +23,17 @@ func jsString(a interface{}) string {
 	return ""
 }
 
+func mergeAttr(m1, m2 js.M) js.M {
+	for k, v := range m2 {
+		m1[k] = v
+	}
+	return m1
+}
+
+func initJq(tag string) jquery.JQuery {
+	return jQuery(js.Global.Get("document").Call("createElementNS", "http://www.w3.org/2000/svg", tag))
+}
+
 func (svg Svg) String() string {
 	result := `<svg width="` + jsString(svg.Width) + `" height="` + jsString(svg.Height) + `">`
 	for _, v := range svg.Content {
@@ -31,6 +45,8 @@ func (svg Svg) String() string {
 
 type SvgElement interface {
 	String() string
+	Jq() jquery.JQuery
+	MoveTo(x, y float64)
 }
 
 //SvgElement
@@ -41,6 +57,7 @@ type Rect struct {
 	Y      float64 `svg:"y"`
 	RX     float64 `svg:"rx"`
 	RY     float64 `svg:"ry"`
+	Idable
 	Strokeable
 	Draggable
 	Fillable fillable
@@ -48,8 +65,9 @@ type Rect struct {
 
 var unSupportMsg = "Sorry, your browser does not support inline SVG."
 
-func (se Rect) String() string {
+func (se *Rect) String() string {
 	s := `<rect width="` + jsString(se.Width) + `" height="` + jsString(se.Height) + `" x="` + jsString(se.X) + `" y="` + jsString(se.Y) + `"`
+	s += se.Idable.String()
 	s += se.Fillable.String()
 	s += se.Strokeable.String()
 	s += se.Draggable.String()
@@ -61,6 +79,35 @@ func (se Rect) String() string {
 	}
 	s += ` >` + unSupportMsg + `</rect>`
 	return s
+}
+
+func (se *Rect) Jq() jquery.JQuery {
+	attr := js.M{
+		"width":  se.Width,
+		"height": se.Height,
+		"x":      se.X,
+		"y":      se.Y,
+	}
+	attr = mergeAttr(attr, se.Idable.Attr())
+	attr = mergeAttr(attr, se.Fillable.Attr())
+	attr = mergeAttr(attr, se.Strokeable.Attr())
+	attr = mergeAttr(attr, se.Draggable.Attr())
+	if se.RX != 0 {
+		attr["rx"] = se.RX
+	}
+	if se.RY != 0 {
+		attr["ry"] = se.RY
+	}
+	return initJq("rect").SetAttr(attr)
+}
+
+func (se *Rect) MoveTo(x, y float64) {
+	se.X = x
+	se.Y = y
+	jQuery("#" + se.ID).SetAttr(js.M{
+		"x": se.X,
+		"y": se.Y,
+	})
 }
 
 type StrokeLineCap int
@@ -107,6 +154,33 @@ func (se Strokeable) String() string {
 	return s
 }
 
+func (se Strokeable) Attr() js.M {
+	attr := js.M{}
+	if se.Stroke != "" {
+		attr["stroke"] = se.Stroke
+	}
+	if se.StrokeWidth != 0 {
+		attr["stroke-width"] = se.StrokeWidth
+	}
+
+	if se.StrokeDashArray != nil && len(se.StrokeDashArray) > 0 {
+		s := `"`
+		for k, v := range se.StrokeDashArray {
+			if k != 0 {
+				s += ","
+			}
+			s += jsString(v)
+		}
+		s += `"`
+		attr["stroke-dasharray"] = s
+	}
+
+	if se.StrokeLineCap != BUTT {
+		attr["stroke-linecap"] = strokeLineCapString[se.StrokeLineCap]
+	}
+	return attr
+}
+
 type Draggable struct {
 	Draggable bool
 }
@@ -116,6 +190,34 @@ func (draggable Draggable) String() string {
 		return ` class="draggable"`
 	}
 	return ""
+}
+
+func (draggable Draggable) Attr() js.M {
+	if draggable.Draggable {
+		return js.M{"class": "draggable"}
+	}
+	return js.M{}
+}
+
+type Idable struct {
+	ID string
+}
+
+func (id Idable) String() string {
+	if id.ID == "" {
+		return ""
+	}
+	return ` id="` + jsString(id.ID) + `"`
+}
+
+func (id Idable) Attr() js.M {
+	if id.ID == "" {
+		return js.M{}
+	}
+
+	return js.M{
+		"id": id.ID,
+	}
 }
 
 type fillable struct {
@@ -142,6 +244,17 @@ func (se fillable) String() string {
 	}
 
 	return s
+}
+
+func (se fillable) Attr() js.M {
+	attr := js.M{}
+	if se.Fill != "" {
+		attr["fill"] = se.Fill
+	}
+	if se.Opacity != float64(1) {
+		attr["fill-opacity"] = se.Opacity
+	}
+	return attr
 }
 
 //SvgElement
@@ -191,14 +304,38 @@ type Line struct {
 	Y2 float64 `svg:"y2"`
 	Strokeable
 	Draggable
+	Idable
 }
 
-func (se Line) String() string {
+func (se *Line) String() string {
 	s := `<line x1="` + jsString(se.X1) + `" y1="` + jsString(se.Y1) + `" x2="` + jsString(se.X2) + `" y2="` + jsString(se.Y2) + `"`
+	s += se.Idable.String()
 	s += se.Strokeable.String()
 	s += se.Draggable.String()
 	s += ` >` + unSupportMsg + `</line>`
 	return s
+}
+
+func (se *Line) Jq() jquery.JQuery {
+	attr := js.M{
+		"x1": se.X1,
+		"y1": se.Y1,
+		"x2": se.X2,
+		"y2": se.Y2,
+	}
+	attr = mergeAttr(attr, se.Idable.Attr())
+	attr = mergeAttr(attr, se.Strokeable.Attr())
+	attr = mergeAttr(attr, se.Draggable.Attr())
+	return initJq("line").SetAttr(attr)
+}
+
+func (se *Line) MoveTo(x, y float64) {
+	dx := x - se.X1
+	dy := y - se.Y1
+	se.X1 = x
+	se.Y1 = y
+	se.X2 += dx
+	se.Y2 += dy
 }
 
 type Point struct {
@@ -294,6 +431,7 @@ type Path struct {
 	Fillable fillable
 	Strokeable
 	Draggable
+	Idable
 }
 
 func (ps PathItems) String() string {
@@ -310,13 +448,35 @@ func (ps PathItems) String() string {
 	return s
 }
 
-func (se Path) String() string {
+func (se *Path) String() string {
 	s := `<path d="` + se.D.String() + `"`
+	s += se.Idable.String()
 	s += se.Fillable.String()
 	s += se.Strokeable.String()
 	s += se.Draggable.String()
 	s += ` >` + unSupportMsg + `</path>`
 	return s
+}
+
+func (se *Path) Jq() jquery.JQuery {
+	attr := js.M{
+		"d": se.D.String(),
+	}
+	attr = mergeAttr(attr, se.Fillable.Attr())
+	attr = mergeAttr(attr, se.Strokeable.Attr())
+	attr = mergeAttr(attr, se.Draggable.Attr())
+
+	return initJq("path").SetAttr(attr)
+}
+
+func (se *Path) MoveTo(x, y float64) {
+	dx := x - se.D[0].Point.x
+	dy := y - se.D[0].Point.y
+	for k := range se.D {
+		se.D[k].Point.x += dx
+		se.D[k].Point.y += dy
+	}
+	jQuery("#"+se.ID).SetAttr("d", se.D.String())
 }
 
 type Text struct {
@@ -326,10 +486,12 @@ type Text struct {
 	Fillable fillable
 	Strokeable
 	Draggable
+	Idable
 }
 
-func (se Text) String() string {
+func (se *Text) String() string {
 	s := `<text x="` + jsString(se.X) + `" y="` + jsString(se.Y) + `"`
+	s += se.Idable.String()
 	s += se.Fillable.String()
 	s += se.Strokeable.String()
 	s += se.Draggable.String()
@@ -337,15 +499,39 @@ func (se Text) String() string {
 	return s
 }
 
+func (se *Text) Jq() jquery.JQuery {
+	attr := js.M{
+		"x": se.X,
+		"y": se.Y,
+	}
+	attr = mergeAttr(attr, se.Idable.Attr())
+	attr = mergeAttr(attr, se.Fillable.Attr())
+	attr = mergeAttr(attr, se.Strokeable.Attr())
+	attr = mergeAttr(attr, se.Draggable.Attr())
+	return initJq("text").SetAttr(attr).SetHtml(se.Content)
+}
+
+func (se *Text) MoveTo(x, y float64) {
+	se.X = x
+	se.Y = y
+	jQuery("#" + se.ID).SetAttr(js.M{
+		"x": se.X,
+		"y": se.Y,
+	})
+
+}
+
 type Group struct {
-	Content  []SvgElement `svg:"content"`
+	Content []SvgElement `svg:"content"`
+	Idable
 	Fillable fillable
 	Strokeable
 	Draggable
 }
 
-func (se Group) String() string {
+func (se *Group) String() string {
 	s := `<g `
+	s += se.Idable.String()
 	s += se.Fillable.String()
 	s += se.Strokeable.String()
 	s += se.Draggable.String()
@@ -355,4 +541,24 @@ func (se Group) String() string {
 	}
 	s += `</g>`
 	return s
+}
+
+func (se *Group) Jq() jquery.JQuery {
+	attr := js.M{}
+	attr = mergeAttr(attr, se.Idable.Attr())
+	attr = mergeAttr(attr, se.Fillable.Attr())
+	attr = mergeAttr(attr, se.Strokeable.Attr())
+	attr = mergeAttr(attr, se.Draggable.Attr())
+	s := ""
+	for _, v := range se.Content {
+		s += v.String()
+	}
+	return initJq("g").SetAttr(attr).SetHtml(s)
+}
+
+func (se *Group) MoveTo(x, y float64) {
+	//do nothing
+	//for k := range se.Content {
+	//	se.Content[k].MoveTo(x, y)
+	//}
 }

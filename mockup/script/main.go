@@ -13,8 +13,8 @@ func main() {
 	container := initPanel()
 	container.Content = initToolBar(container)
 
-	label1 := mockup.NewLabel(160, 60, 400, 150, "big text a lal ha", false)
-	label2 := mockup.NewLabel(60, 60, 400, 450, "label2", true)
+	label1 := mockup.NewLabel(160, 60, 400, 150, "big text a lal ha", "E1", false)
+	label2 := mockup.NewLabel(60, 60, 400, 450, "label2", "E2", true)
 
 	border1 := mockup.NewScaleBox(label1)
 
@@ -24,21 +24,26 @@ func main() {
 		border1.Svg(),
 	)
 
-	enableControl()
+	m := map[string]mockup.MockupElement{
+		"M_E1": border1,
+		"E2":   label2,
+	}
+
+	enableControl(m)
 	js.Global.Get("document").Call("write", container.String())
 	println("here")
 }
 
-func enableControl() {
-	mockup.NewDraggable(mockup.MovableNil, 260, 5, 1260, 805).BindEvents()
+func enableControl(m map[string]mockup.MockupElement) {
+	mockup.NewDraggable(mockup.MovableNil, 260, 5, 1260, 805).BindEvents(m)
 }
 
 func initToolBar(container svg.Svg) []svg.SvgElement {
-	textboxTool := mockup.NewTextBox(60, 20, 30, 20, "textbox")
-	buttonTool := mockup.NewButton(60, 20, 150, 20, "button")
-	boxTool := mockup.NewBox(60, 60, 30, 60)
-	labelTool := mockup.NewLabel(60, 20, 160, 90, "label", false)
-	lineTool := mockup.NewLine(60, 0, 30, 160)
+	textboxTool := mockup.NewTextBox(60, 20, 30, 20, "textbox", "T1")
+	buttonTool := mockup.NewButton(60, 20, 150, 20, "button", "T2")
+	boxTool := mockup.NewBox(60, 60, 30, 60, "T3")
+	labelTool := mockup.NewLabel(60, 20, 160, 90, "label", "T4", false)
+	lineTool := mockup.NewLine(60, 0, 30, 160, "T5")
 	return append(container.Content,
 		textboxTool.Svg(),
 		buttonTool.Svg(),

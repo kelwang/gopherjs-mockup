@@ -10,7 +10,6 @@ var document = js.Global.Get("document")
 var console = js.Global.Get("console")
 
 func jsFloat(s interface{}) float64 {
-	println(s)
 	if s != nil && s != "" {
 		return js.Global.Call("parseFloat", s).Float()
 	}
@@ -47,28 +46,25 @@ type Movable struct {
 
 var MovableNil = Movable{JQuery: jQuery(nil)}
 
-func (dr *Draggable) BindEvents() {
+func (dr *Draggable) BindEvents(m map[string]MockupElement) {
 	jQuery(document).On(jquery.MOUSEDOWN, ".draggable", dr.start)
 	jQuery(document).On(jquery.MOUSEUP, ".draggable", dr.stop)
-	jQuery(document).On(jquery.MOUSEMOVE, dr.dragging)
+	jQuery(document).On(jquery.MOUSEMOVE, func(e jquery.Event) {
+		dr.dragging(e, m)
+	})
 }
 
-func (dr *Draggable) dragging(e jquery.Event) {
+func (dr *Draggable) dragging(e jquery.Event, m map[string]MockupElement) {
+	//container := jQuery("svg")
 	if dr.Movable != MovableNil {
+		id := dr.Movable.Attr("id")
+		ele := m[id]
 		width := float64(dr.Movable.Width())
 		height := float64(dr.Movable.Height())
 		clientX := e.Get("offsetX").Float()
 		clientY := e.Get("offsetY").Float()
 		if clientX-width >= dr.X1 && clientX < dr.X2 && clientY-height >= dr.Y1 && clientY < dr.Y2 {
-			diffX := clientX - width - jsFloat(dr.Movable.Attr("x"))
-			diffY := clientY - jsFloat(dr.Movable.Attr("y"))
-			dr.Movable.Children("").Each(func(i int, ele interface{}) {
-				el := jQuery(ele)
-				el.SetAttr("x", jsFloat(el.Attr("x"))+diffX)
-				el.SetAttr("y", jsFloat(el.Attr("y"))+diffY)
-			})
-			dr.Movable.SetAttr("x", jsFloat(dr.Movable.Attr("x"))+diffX)
-			dr.Movable.SetAttr("y", jsFloat(dr.Movable.Attr("y"))+diffY)
+			ele.MoveTo(clientX-width, clientY)
 		}
 	}
 }
