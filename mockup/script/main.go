@@ -19,25 +19,21 @@ func main() {
 	box1 := mockup.NewBox(100, 100, 800, 158, "E4")
 	line1 := mockup.NewLine(100, 10, 800, 400, "E5")
 
-	border1 := mockup.NewScaleBox(label1)
-	border2 := mockup.NewScaleBox(textbox1)
-	border3 := mockup.NewScaleBox(button1)
-	border4 := mockup.NewScaleBox(box1)
 	border5 := mockup.NewScaleBox(line1)
 
 	container.Content = append(container.Content,
-		border1.Svg(),
-		border2.Svg(),
-		border3.Svg(),
-		border4.Svg(),
+		label1.Svg(),
+		textbox1.Svg(),
+		button1.Svg(),
+		box1.Svg(),
 		border5.Svg(),
 	)
 
 	m := map[string]mockup.MockupElement{
-		"M_E1": border1,
-		"M_E2": border2,
-		"M_E3": border3,
-		"M_E4": border4,
+		"E1":   label1,
+		"E2":   textbox1,
+		"E3":   button1,
+		"E4":   box1,
 		"M_E5": border5,
 	}
 
@@ -47,7 +43,36 @@ func main() {
 }
 
 func enableControl(m map[string]mockup.MockupElement) {
+	jQuery(js.Global.Get("document")).On(jquery.DBLCLICK, ".editable", func(e jquery.Event) {
+		wrapEditable(e, m)
+	})
+
+	jQuery(js.Global.Get("document")).On(jquery.DBLCLICK, ".editing", func(e jquery.Event) {
+		unwrapEditable(e, m)
+	})
+
 	mockup.NewDraggable(mockup.MovableNil, 260, 5, 1260, 805).BindEvents(m)
+}
+
+func wrapEditable(e jquery.Event, m map[string]mockup.MockupElement) {
+	//container := jQuery("svg")
+	id := jQuery(e.CurrentTarget).Attr("id")
+	if mockupE, ok := m[id]; ok {
+		border1 := mockup.NewScaleBox(mockupE)
+		m["M_"+id] = border1
+		jQuery("#" + id).ReplaceWith(border1.Svg().Jq())
+		jQuery("#M_" + id).AddClass("editing")
+	}
+}
+
+func unwrapEditable(e jquery.Event, m map[string]mockup.MockupElement) {
+
+	//container := jQuery("svg")
+	id := jQuery(e.CurrentTarget).Attr("id")
+	if border, ok := m[id]; ok {
+		jQuery("#" + id).ReplaceWith(border.(*mockup.ScaleBox).MockupElement.Svg().Jq())
+		delete(m, id)
+	}
 }
 
 func initToolBar(container svg.Svg) []svg.SvgElement {

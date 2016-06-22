@@ -19,6 +19,7 @@ type MockupElement interface {
 	Id() string
 	GetWHXY() (float64, float64, float64, float64)
 	MoveTo(x, y float64)
+	GetBase() *BaseElement
 }
 
 type BaseElement struct {
@@ -28,6 +29,15 @@ type BaseElement struct {
 
 func (be *BaseElement) GetWHXY() (float64, float64, float64, float64) {
 	return be.Dimension.Width, be.Dimension.Height, be.Position.X, be.Position.Y
+}
+
+func (be *BaseElement) GetBase() *BaseElement {
+	return be
+}
+
+func (be *BaseElement) MoveTo(x, y float64) {
+	be.Position.X = x
+	be.Position.Y = y
 }
 
 func newBaseElement(width, height, x, y float64) BaseElement {
@@ -106,9 +116,7 @@ func NewTextBox(w, h, x, y float64, content string, id string) *textBox {
 
 func (ele *textBox) Svg() svg.SvgElement {
 	return &svg.Group{
-		Editable: svg.Editable{
-			Draggable: true,
-		},
+		Editable: svg.EDITABLE,
 		Idable: svg.Idable{
 			ID: ele.id,
 		},
@@ -140,6 +148,8 @@ func (ele *textBox) Svg() svg.SvgElement {
 }
 
 func (ele *textBox) MoveTo(x, y float64) {
+	ele.BaseElement.MoveTo(x, y)
+
 	w, h, _, _ := ele.GetWHXY()
 	content := ele.Svg().(*svg.Group).Content
 
@@ -181,9 +191,7 @@ func (ele *button) Svg() svg.SvgElement {
 		Idable: svg.Idable{
 			ID: ele.idable.id,
 		},
-		Editable: svg.Editable{
-			Draggable: true,
-		},
+		Editable: svg.EDITABLE,
 		Content: []svg.SvgElement{
 			&svg.Rect{
 				Width:    ele.BaseElement.Dimension.Width,
@@ -218,6 +226,8 @@ func (ele *button) Svg() svg.SvgElement {
 }
 
 func (ele *button) MoveTo(x, y float64) {
+	ele.BaseElement.MoveTo(x, y)
+
 	w, h, _, _ := ele.GetWHXY()
 	content := ele.Svg().(*svg.Group).Content
 
@@ -255,9 +265,7 @@ func (ele *box) Svg() svg.SvgElement {
 			Stroke:      ele.Stroke.Color,
 			StrokeWidth: ele.Stroke.Thickness.Float64(),
 		},
-		Editable: svg.Editable{
-			Draggable: true,
-		},
+		Editable: svg.EDITABLE,
 		Idable: svg.Idable{
 			ID: ele.id,
 		},
@@ -265,6 +273,8 @@ func (ele *box) Svg() svg.SvgElement {
 }
 
 func (ele *box) MoveTo(x, y float64) {
+	ele.BaseElement.MoveTo(x, y)
+
 	w, h, _, _ := ele.GetWHXY()
 	ele.Svg().MoveTo(x+w/3, y+h/3)
 }
@@ -295,9 +305,7 @@ func NewLabel(w, h, x, y float64, content string, id string, draggable bool) *la
 
 func (ele *label) Svg() svg.SvgElement {
 	return &svg.Group{
-		Editable: svg.Editable{
-			Draggable: true,
-		},
+		Editable: svg.EDITABLE,
 		Idable: svg.Idable{
 			ID: ele.id,
 		},
@@ -318,18 +326,22 @@ func (ele *label) Svg() svg.SvgElement {
 					Stroke:      ele.Text.Color,
 					StrokeWidth: ele.Stroke.Thickness.Float64(),
 				},
-				Idable: svg.Idable{ID: ele.idable.id + "_inner"},
+				Editable: svg.EDITABLE,
+				Idable:   svg.Idable{ID: ele.idable.id + "_inner"},
 			},
 		},
 	}
 }
 
 func (ele *label) MoveTo(x, y float64) {
+
 	w, h, _, _ := ele.GetWHXY()
 	content := ele.Svg().(*svg.Group).Content
 
 	content[0].MoveTo(x+w/3, y+h/3)
 	content[1].MoveTo(x+w/3+w/2-float64(7*len(ele.Text.Content))/2, y+h/3+(h+7)/2)
+	ele.BaseElement.MoveTo(x+w/3+w/2-float64(7*len(ele.Text.Content))/2, y+h/3+(h+7)/2)
+
 }
 
 type line struct {
@@ -359,9 +371,7 @@ func (ele *line) Svg() svg.SvgElement {
 			Stroke:      DARKGREY,
 			StrokeWidth: ele.Stroke.Thickness.Float64(),
 		},
-		Editable: svg.Editable{
-			Draggable: true,
-		},
+		Editable: svg.EDITABLE,
 		Idable: svg.Idable{
 			ID: ele.id,
 		},
@@ -449,9 +459,7 @@ func (ele *ScaleBox) Svg() svg.SvgElement {
 			scaleboxRect(x+w-square_height/2, y+h-square_height/2, stroke_width, square_height, ele.idable.id+"_sq8"),
 			ele.MockupElement.Svg(),
 		},
-		Editable: svg.Editable{
-			Draggable: true,
-		},
+		Editable: svg.DRAGGABLE,
 		Fillable: svg.NewFillable(WHITE, 1),
 		Idable: svg.Idable{
 			ID: ele.idable.id,

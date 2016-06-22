@@ -181,22 +181,40 @@ func (se Strokeable) Attr() js.M {
 	return attr
 }
 
-type Editable struct {
-	Draggable bool
+const (
+	INEDITABLE Editable = 1 << iota
+	EDITABLE
+	DRAGGABLE
+)
+
+var editable_class = []string{
+	"ineditable",
+	"editable",
+	"draggable",
 }
 
+type Editable int
+
 func (editable Editable) String() string {
-	if editable.Draggable {
-		return ` class="draggable"`
+	if c := editable.Attr()["class"].(string); c != "" {
+		return ` class="` + c + `"`
 	}
 	return ""
 }
 
 func (editable Editable) Attr() js.M {
-	if editable.Draggable {
-		return js.M{"class": "draggable"}
+	i := 0
+	class := ""
+	for editable>>1 != 0 || editable != 0 {
+		if r := editable % 2; r == 1 {
+			class += " " + editable_class[i]
+		}
+		i++
+		editable = editable >> 1
 	}
-	return js.M{}
+	return js.M{
+		"class": class[1:],
+	}
 }
 
 type Idable struct {
