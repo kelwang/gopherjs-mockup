@@ -148,13 +148,13 @@ func (ele *textBox) Svg() svg.SvgElement {
 }
 
 func (ele *textBox) MoveTo(x, y float64) {
-	ele.BaseElement.MoveTo(x, y)
-
 	w, h, _, _ := ele.GetWHXY()
 	content := ele.Svg().(*svg.Group).Content
-
 	content[0].MoveTo(x+w/3, y+h/3)
-	content[1].MoveTo(x+w/3+w/2-float64(7*len(ele.Text.Content))/2, y+h/3+(h+7)/2)
+	x1 := x + w/3 + w/2 - float64(7*len(ele.Text.Content))/2
+	y1 := y + h/3 + (h+7)/2
+	content[1].MoveTo(x1, y1)
+	ele.BaseElement.MoveTo(x+w/3, y+h/3)
 }
 
 func min(a, b float64) float64 {
@@ -226,13 +226,13 @@ func (ele *button) Svg() svg.SvgElement {
 }
 
 func (ele *button) MoveTo(x, y float64) {
-	ele.BaseElement.MoveTo(x, y)
-
 	w, h, _, _ := ele.GetWHXY()
 	content := ele.Svg().(*svg.Group).Content
-
 	content[0].MoveTo(x+w/3, y+h/3)
-	content[1].MoveTo(x+w/3+w/2-float64(7*len(ele.Text.Content))/2, y+h/3+(h+7)/2)
+	x1 := x + w/3 + w/2 - float64(7*len(ele.Text.Content))/2
+	y1 := y + h/3 + (h+7)/2
+	content[1].MoveTo(x1, y1)
+	ele.BaseElement.MoveTo(x+w/3, y+h/3)
 }
 
 type box struct {
@@ -273,10 +273,10 @@ func (ele *box) Svg() svg.SvgElement {
 }
 
 func (ele *box) MoveTo(x, y float64) {
-	ele.BaseElement.MoveTo(x, y)
-
 	w, h, _, _ := ele.GetWHXY()
 	ele.Svg().MoveTo(x+w/3, y+h/3)
+	ele.BaseElement.MoveTo(x+w/3, y+h/3)
+
 }
 
 type label struct {
@@ -334,13 +334,13 @@ func (ele *label) Svg() svg.SvgElement {
 }
 
 func (ele *label) MoveTo(x, y float64) {
-
 	w, h, _, _ := ele.GetWHXY()
 	content := ele.Svg().(*svg.Group).Content
-
 	content[0].MoveTo(x+w/3, y+h/3)
-	content[1].MoveTo(x+w/3+w/2-float64(7*len(ele.Text.Content))/2, y+h/3+(h+7)/2)
-	ele.BaseElement.MoveTo(x+w/3+w/2-float64(7*len(ele.Text.Content))/2, y+h/3+(h+7)/2)
+	x1 := x + w/3 + w/2 - float64(7*len(ele.Text.Content))/2
+	y1 := y + h/3 + (h+7)/2
+	content[1].MoveTo(x1, y1)
+	ele.BaseElement.MoveTo(x+w/3, y+h/3)
 
 }
 
