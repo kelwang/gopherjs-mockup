@@ -185,12 +185,35 @@ const (
 	INEDITABLE Editable = 1 << iota
 	EDITABLE
 	DRAGGABLE
+	LINABLE
+	EW_RESIZABLE
+	NS_RESIZABLE
+	NESW_RESIZABLE
+	NWSE_RESIZABLE
 )
 
 var editable_class = []string{
 	"ineditable",
 	"editable",
 	"draggable",
+	"linable",
+	"ew-resizable",
+	"ns-resizable",
+	"nesw-resizable",
+	"nwse-resizable",
+}
+
+//choose only 1
+func (editable Editable) JqSelector() string {
+	i := 0
+	for editable>>1 != 0 || editable != 0 {
+		if r := editable % 2; r == 1 {
+			return "." + editable_class[i]
+		}
+		i++
+		editable = editable >> 1
+	}
+	return "."
 }
 
 type Editable int

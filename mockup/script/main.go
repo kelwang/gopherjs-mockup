@@ -8,6 +8,9 @@ import (
 )
 
 var jQuery = jquery.NewJQuery
+var document = js.Global.Get("document")
+var editing_class = "editing"
+var line_editing_class = "line_editing"
 
 func main() {
 	container := initPanel()
@@ -19,22 +22,20 @@ func main() {
 	box1 := mockup.NewBox(100, 100, 800, 158, "E4")
 	line1 := mockup.NewLine(100, 10, 800, 400, "E5")
 
-	border5 := mockup.NewScaleBox(line1)
-
 	container.Content = append(container.Content,
 		label1.Svg(),
 		textbox1.Svg(),
 		button1.Svg(),
 		box1.Svg(),
-		border5.Svg(),
+		line1.Svg(),
 	)
 
 	m := map[string]mockup.MockupElement{
-		"E1":   label1,
-		"E2":   textbox1,
-		"E3":   button1,
-		"E4":   box1,
-		"M_E5": border5,
+		"E1": label1,
+		"E2": textbox1,
+		"E3": button1,
+		"E4": box1,
+		"E5": line1,
 	}
 
 	enableControl(m)
@@ -43,15 +44,41 @@ func main() {
 }
 
 func enableControl(m map[string]mockup.MockupElement) {
-	jQuery(js.Global.Get("document")).On(jquery.DBLCLICK, ".editable", func(e jquery.Event) {
+	jQuery(document).On(jquery.DBLCLICK, svg.EDITABLE.JqSelector(), func(e jquery.Event) {
 		wrapEditable(e, m)
 	})
 
-	jQuery(js.Global.Get("document")).On(jquery.DBLCLICK, ".editing", func(e jquery.Event) {
+	jQuery(document).On(jquery.DBLCLICK, svg.LINABLE.JqSelector(), func(e jquery.Event) {
+		wrapLinable(e, m)
+	})
+
+	jQuery(document).On(jquery.DBLCLICK, "."+editing_class, func(e jquery.Event) {
 		unwrapEditable(e, m)
 	})
 
-	mockup.NewDraggable(mockup.MovableNil, 260, 5, 1260, 805).BindEvents(m)
+	jQuery(document).On(jquery.DBLCLICK, "."+line_editing_class, func(e jquery.Event) {
+		unwrapLinable(e, m)
+	})
+
+	mockup.NewEditable(260, 5, 1260, 805).BindEvents(m)
+}
+
+func wrapLinable(e jquery.Event, m map[string]mockup.MockupElement) {
+	id := jQuery(e.CurrentTarget).Attr("id")
+	if mockupE, ok := m[id]; ok {
+		border := mockup.NewScaleLine(mockupE)
+		m[mockup.EditablePrefix+id] = border
+		jQuery("#" + id).ReplaceWith(border.Svg().Jq())
+		jQuery("#" + mockup.EditablePrefix + id).AddClass(line_editing_class)
+	}
+}
+
+func unwrapLinable(e jquery.Event, m map[string]mockup.MockupElement) {
+	id := jQuery(e.CurrentTarget).Attr("id")
+	if border, ok := m[id]; ok {
+		jQuery("#" + id).ReplaceWith(border.(*mockup.ScaleLine).Line().Svg().Jq())
+		delete(m, id)
+	}
 }
 
 func wrapEditable(e jquery.Event, m map[string]mockup.MockupElement) {
@@ -59,9 +86,9 @@ func wrapEditable(e jquery.Event, m map[string]mockup.MockupElement) {
 	id := jQuery(e.CurrentTarget).Attr("id")
 	if mockupE, ok := m[id]; ok {
 		border1 := mockup.NewScaleBox(mockupE)
-		m["M_"+id] = border1
+		m[mockup.EditablePrefix+id] = border1
 		jQuery("#" + id).ReplaceWith(border1.Svg().Jq())
-		jQuery("#M_" + id).AddClass("editing")
+		jQuery("#" + mockup.EditablePrefix + id).AddClass(editing_class)
 	}
 }
 

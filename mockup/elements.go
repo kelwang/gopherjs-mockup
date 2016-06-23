@@ -4,6 +4,8 @@ import (
 	"github.com/kelwang/gopherjs-mockup/mockup/svg"
 )
 
+var EditablePrefix = "M_"
+
 type Position struct {
 	X float64
 	Y float64
@@ -276,7 +278,6 @@ func (ele *box) MoveTo(x, y float64) {
 	w, h, _, _ := ele.GetWHXY()
 	ele.Svg().MoveTo(x+w/3, y+h/3)
 	ele.BaseElement.MoveTo(x+w/3, y+h/3)
-
 }
 
 type label struct {
@@ -341,7 +342,6 @@ func (ele *label) MoveTo(x, y float64) {
 	y1 := y + h/3 + (h+7)/2
 	content[1].MoveTo(x1, y1)
 	ele.BaseElement.MoveTo(x+w/3, y+h/3)
-
 }
 
 type line struct {
@@ -371,7 +371,7 @@ func (ele *line) Svg() svg.SvgElement {
 			Stroke:      DARKGREY,
 			StrokeWidth: ele.Stroke.Thickness.Float64(),
 		},
-		Editable: svg.EDITABLE,
+		Editable: svg.LINABLE,
 		Idable: svg.Idable{
 			ID: ele.id,
 		},
@@ -379,8 +379,8 @@ func (ele *line) Svg() svg.SvgElement {
 }
 
 func (ele *line) MoveTo(x, y float64) {
-	svg := ele.Svg().(*svg.Line)
-	ele.Svg().MoveTo(x+(svg.X2-svg.X1)/3, y+(svg.Y2-svg.Y1)/3)
+	ele.BaseElement.MoveTo(x, y)
+	ele.Svg().MoveTo(x, y)
 }
 
 type ScaleBox struct {
@@ -390,7 +390,7 @@ type ScaleBox struct {
 
 func NewScaleBox(mockupElement MockupElement) *ScaleBox {
 	return &ScaleBox{
-		idable:        idable{id: "M_" + mockupElement.Id()},
+		idable:        idable{id: EditablePrefix + mockupElement.Id()},
 		MockupElement: mockupElement,
 	}
 }
@@ -449,14 +449,14 @@ func (ele *ScaleBox) Svg() svg.SvgElement {
 					ID: ele.idable.id + "_outter",
 				},
 			},
-			scaleboxRect(x-square_height/2, y-square_height/2, stroke_width, square_height, ele.idable.id+"_sq1"),
-			scaleboxRect(x+w/2-square_height/2, y-square_height/2, stroke_width, square_height, ele.idable.id+"_sq2"),
-			scaleboxRect(x-square_height/2, y+h/2-square_height/2, stroke_width, square_height, ele.idable.id+"_sq3"),
-			scaleboxRect(x-square_height/2, y+h-square_height/2, stroke_width, square_height, ele.idable.id+"_sq4"),
-			scaleboxRect(x+w-square_height/2, y-square_height/2, stroke_width, square_height, ele.idable.id+"_sq5"),
-			scaleboxRect(x+w/2-square_height/2, y+h-square_height/2, stroke_width, square_height, ele.idable.id+"_sq6"),
-			scaleboxRect(x+w-square_height/2, y+h/2-square_height/2, stroke_width, square_height, ele.idable.id+"_sq7"),
-			scaleboxRect(x+w-square_height/2, y+h-square_height/2, stroke_width, square_height, ele.idable.id+"_sq8"),
+			scaleboxRect(x-square_height/2, y-square_height/2, stroke_width, square_height, "sq1_"+ele.idable.id, svg.NWSE_RESIZABLE),
+			scaleboxRect(x+w/2-square_height/2, y-square_height/2, stroke_width, square_height, "sq2_"+ele.idable.id, svg.NS_RESIZABLE),
+			scaleboxRect(x-square_height/2, y+h/2-square_height/2, stroke_width, square_height, "sq3_"+ele.idable.id, svg.EW_RESIZABLE),
+			scaleboxRect(x-square_height/2, y+h-square_height/2, stroke_width, square_height, "sq4_"+ele.idable.id, svg.NESW_RESIZABLE),
+			scaleboxRect(x+w-square_height/2, y-square_height/2, stroke_width, square_height, "sq5_"+ele.idable.id, svg.NESW_RESIZABLE),
+			scaleboxRect(x+w/2-square_height/2, y+h-square_height/2, stroke_width, square_height, "sq6_"+ele.idable.id, svg.NS_RESIZABLE),
+			scaleboxRect(x+w-square_height/2, y+h/2-square_height/2, stroke_width, square_height, "sq7_"+ele.idable.id, svg.EW_RESIZABLE),
+			scaleboxRect(x+w-square_height/2, y+h-square_height/2, stroke_width, square_height, "sq8_"+ele.idable.id, svg.NWSE_RESIZABLE),
 			ele.MockupElement.Svg(),
 		},
 		Editable: svg.DRAGGABLE,
@@ -467,7 +467,14 @@ func (ele *ScaleBox) Svg() svg.SvgElement {
 	}
 }
 
-func scaleboxRect(x, y, stroke_width, square_height float64, id string) *svg.Rect {
+func (ele *ScaleBox) ResizeTo(x, y float64, sqr int) {
+	println(sqr)
+	content := ele.Svg().(*svg.Group).Content
+	content[sqr].MoveTo(x, y)
+
+}
+
+func scaleboxRect(x, y, stroke_width, square_height float64, id string, ed svg.Editable) *svg.Rect {
 	return &svg.Rect{
 		X:        x,
 		Y:        y,
@@ -481,5 +488,48 @@ func scaleboxRect(x, y, stroke_width, square_height float64, id string) *svg.Rec
 		Idable: svg.Idable{
 			ID: id,
 		},
+		Editable: ed,
 	}
+}
+
+type ScaleLine struct {
+	idable
+	*line
+}
+
+func NewScaleLine(l MockupElement) *ScaleLine {
+	ll := l.(*line)
+	return &ScaleLine{
+		idable: idable{id: EditablePrefix + ll.idable.id},
+		line:   ll,
+	}
+}
+
+func (ele *ScaleLine) Line() *line {
+	return ele.line
+}
+
+func (ele *ScaleLine) Svg() svg.SvgElement {
+	w, h, x, y := ele.line.GetWHXY()
+	return &svg.Group{
+		Content: []svg.SvgElement{
+			ele.line.Svg(),
+			scaleboxRect(x-square_height/2, y-square_height/2, stroke_width, square_height, ele.idable.id+"_sq1", svg.DRAGGABLE),
+			scaleboxRect(x+w-square_height/2, y+h-square_height/2, stroke_width, square_height, ele.idable.id+"_sq8", svg.DRAGGABLE),
+		},
+		Editable: svg.DRAGGABLE,
+		Fillable: svg.NewFillable(WHITE, 1),
+		Idable: svg.Idable{
+			ID: ele.idable.id,
+		},
+	}
+}
+
+func (ele *ScaleLine) MoveTo(x, y float64) {
+	content := ele.Svg().(*svg.Group).Content
+	w, h, _, _ := ele.line.GetWHXY()
+	ele.line.MoveTo(x, y)
+	content[1].MoveTo(x-square_height/2, y-square_height/2)
+	content[2].MoveTo(x+w-square_height/2, y+h-square_height/2)
+
 }
