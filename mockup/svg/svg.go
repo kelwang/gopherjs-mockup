@@ -47,6 +47,7 @@ type SvgElement interface {
 	String() string
 	Jq() jquery.JQuery
 	MoveTo(x, y float64)
+	ResizeTo(w, h float64)
 }
 
 //SvgElement
@@ -107,6 +108,15 @@ func (se *Rect) MoveTo(x, y float64) {
 	jQuery("#" + se.ID).SetAttr(js.M{
 		"x": se.X,
 		"y": se.Y,
+	})
+}
+
+func (se *Rect) ResizeTo(w, h float64) {
+	se.Width = w
+	se.Height = h
+	jQuery("#" + se.ID).SetAttr(js.M{
+		"width":  se.Width,
+		"height": se.Height,
 	})
 }
 
@@ -385,6 +395,10 @@ func (se *Line) MoveTo(x, y float64) {
 	})
 }
 
+func (se *Line) ResizeTo(w, h float64) {
+
+}
+
 type Point struct {
 	x float64
 	y float64
@@ -526,6 +540,15 @@ func (se *Path) MoveTo(x, y float64) {
 	jQuery("#"+se.ID).SetAttr("d", se.D.String())
 }
 
+func (se *Path) ResizeTo(w, h float64) {
+	//do nothing
+}
+
+func (se *Path) SetD(d PathItems) {
+	se.D = d
+	jQuery("#"+se.ID).SetAttr("d", se.D.String())
+}
+
 type Text struct {
 	Content  string  `svg:"content"`
 	X        float64 `svg:"x"`
@@ -568,6 +591,10 @@ func (se *Text) MoveTo(x, y float64) {
 
 }
 
+func (se *Text) ResizeTo(w, h float64) {
+
+}
+
 type Group struct {
 	Content []SvgElement `svg:"content"`
 	Idable
@@ -605,4 +632,10 @@ func (se *Group) Jq() jquery.JQuery {
 
 func (se *Group) MoveTo(x, y float64) {
 	//do nothing
+}
+
+func (se *Group) ResizeTo(w, h float64) {
+	for k := range se.Content {
+		se.Content[k].ResizeTo(w, h)
+	}
 }

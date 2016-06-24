@@ -143,10 +143,10 @@ func (ed *Editable) dragging(e jquery.Event, m map[string]MockupElement) {
 
 	if ed.Scalable != scalableNill {
 		id := ed.Scalable.Attr("id")
-		sqr := id[2:3]
+		//sqr := id[2:3]
 		id = id[4:]
 		ele := m[id]
-		ele.(*ScaleBox).ResizeTo(clientX, clientY, jsInt(sqr))
+		ele.(*ScaleBox).NWResizeTo(clientX, clientY)
 	}
 }
 
