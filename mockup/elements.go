@@ -158,15 +158,22 @@ func (ele *textBox) Svg() svg.SvgElement {
 func (ele *textBox) MoveTo(x, y float64) {
 	w, h, _, _ := ele.GetWHXY()
 	content := ele.Svg().(*svg.Group).Content
-	content[0].MoveTo(x+w/3, y+h/3)
-	x1 := x + w/3 + w/2 - float64(7*len(ele.Text.Content))/2
-	y1 := y + h/3 + (h+7)/2
+	content[0].MoveTo(x, y)
+	x1 := x + w/2 - float64(7*len(ele.Text.Content))/2
+	y1 := y + (h+7)/2
 	content[1].MoveTo(x1, y1)
-	ele.BaseElement.MoveTo(x+w/3, y+h/3)
+	ele.BaseElement.MoveTo(x, y)
 }
 
 func (ele *textBox) ResizeTo(x, y, w, h float64) {
-
+	content := ele.Svg().(*svg.Group).Content
+	content[0].ResizeTo(w, h)
+	ele.BaseElement.ResizeTo(w, h)
+	content[0].MoveTo(x, y)
+	ele.BaseElement.MoveTo(x, y)
+	x1 := x + w/2 - float64(7*len(ele.Text.Content))/2
+	y1 := y + (h+7)/2
+	content[1].MoveTo(x1, y1)
 }
 
 func min(a, b float64) float64 {
@@ -248,7 +255,14 @@ func (ele *button) MoveTo(x, y float64) {
 }
 
 func (ele *button) ResizeTo(x, y, w, h float64) {
-
+	content := ele.Svg().(*svg.Group).Content
+	content[0].ResizeTo(w, h)
+	ele.BaseElement.ResizeTo(w, h)
+	content[0].MoveTo(x, y)
+	ele.BaseElement.MoveTo(x, y)
+	x1 := x + w/2 - float64(7*len(ele.Text.Content))/2
+	y1 := y + (h+7)/2
+	content[1].MoveTo(x1, y1)
 }
 
 type box struct {
@@ -294,15 +308,11 @@ func (ele *box) MoveTo(x, y float64) {
 }
 
 func (ele *box) ResizeTo(x, y, w, h float64) {
-
-	ele.Svg().MoveTo(x, y)
 	ele.Svg().ResizeTo(w, h)
+	ele.BaseElement.ResizeTo(w, h)
+	ele.Svg().MoveTo(x, y)
+	ele.BaseElement.MoveTo(x, y)
 
-	//ele.BaseElement.ResizeTo(w, h)
-	//ele.BaseElement.MoveTo(x, y)
-	//ele.BaseElement.ResizeTo(w, h)
-	//ele.BaseElement.Dimension.Width = w
-	//ele.BaseElement.Dimension.Height = h
 }
 
 type label struct {
@@ -362,15 +372,22 @@ func (ele *label) Svg() svg.SvgElement {
 func (ele *label) MoveTo(x, y float64) {
 	w, h, _, _ := ele.GetWHXY()
 	content := ele.Svg().(*svg.Group).Content
-	content[0].MoveTo(x+w/3, y+h/3)
-	x1 := x + w/3 + w/2 - float64(7*len(ele.Text.Content))/2
-	y1 := y + h/3 + (h+7)/2
+	content[0].MoveTo(x, y)
+	x1 := x + w/2 - float64(7*len(ele.Text.Content))/2
+	y1 := y + (h+7)/2
 	content[1].MoveTo(x1, y1)
-	ele.BaseElement.MoveTo(x+w/3, y+h/3)
+	ele.BaseElement.MoveTo(x, y)
 }
 
 func (ele *label) ResizeTo(x, y, w, h float64) {
-
+	content := ele.Svg().(*svg.Group).Content
+	content[0].ResizeTo(w, h)
+	ele.BaseElement.ResizeTo(w, h)
+	content[0].MoveTo(x, y)
+	ele.BaseElement.MoveTo(x, y)
+	x1 := x + w/2 - float64(7*len(ele.Text.Content))/2
+	y1 := y + (h+7)/2
+	content[1].MoveTo(x1, y1)
 }
 
 type line struct {
@@ -435,11 +452,6 @@ func (ele *ScaleBox) Id() string {
 func (ele *ScaleBox) MoveTo(x, y float64) {
 	content := ele.Svg().(*svg.Group).Content
 	w, h, _, _ := ele.MockupElement.GetWHXY()
-	//	x = x - w/3
-	//	y = y - h/3
-	//	w = w * 1.67
-	//	h = h * 1.67
-	//content[0].MoveTo(x, y)
 	content[1].MoveTo(x-square_height/2, y-square_height/2)
 	content[2].MoveTo(x+w/2-square_height/2, y-square_height/2)
 	content[3].MoveTo(x-square_height/2, y+h/2-square_height/2)
@@ -458,20 +470,16 @@ var square_height = float64(8)
 func (ele *ScaleBox) Svg() svg.SvgElement {
 
 	w, h, x, y := ele.MockupElement.GetWHXY()
-	//	x = x - w/3
-	//	y = y - h/3
-	//	w = w * 1.67
-	//	h = h * 1.67
 	return &svg.Group{
 		Content: []svg.SvgElement{
 			ele.MockupElement.Svg(),
 			scaleboxRect(x-square_height/2, y-square_height/2, stroke_width, square_height, "sq1_"+ele.idable.id, svg.NWSE_RESIZABLE),
 			scaleboxRect(x+w/2-square_height/2, y-square_height/2, stroke_width, square_height, "sq2_"+ele.idable.id, svg.NS_RESIZABLE),
-			scaleboxRect(x-square_height/2, y+h/2-square_height/2, stroke_width, square_height, "sq3_"+ele.idable.id, svg.EW_RESIZABLE),
-			scaleboxRect(x-square_height/2, y+h-square_height/2, stroke_width, square_height, "sq4_"+ele.idable.id, svg.NESW_RESIZABLE),
-			scaleboxRect(x+w-square_height/2, y-square_height/2, stroke_width, square_height, "sq5_"+ele.idable.id, svg.NESW_RESIZABLE),
-			scaleboxRect(x+w/2-square_height/2, y+h-square_height/2, stroke_width, square_height, "sq6_"+ele.idable.id, svg.NS_RESIZABLE),
-			scaleboxRect(x+w-square_height/2, y+h/2-square_height/2, stroke_width, square_height, "sq7_"+ele.idable.id, svg.EW_RESIZABLE),
+			scaleboxRect(x+w-square_height/2, y-square_height/2, stroke_width, square_height, "sq3_"+ele.idable.id, svg.NESW_RESIZABLE),
+			scaleboxRect(x-square_height/2, y+h/2-square_height/2, stroke_width, square_height, "sq4_"+ele.idable.id, svg.EW_RESIZABLE),
+			scaleboxRect(x+w-square_height/2, y+h/2-square_height/2, stroke_width, square_height, "sq5_"+ele.idable.id, svg.EW_RESIZABLE),
+			scaleboxRect(x-square_height/2, y+h-square_height/2, stroke_width, square_height, "sq6_"+ele.idable.id, svg.NESW_RESIZABLE),
+			scaleboxRect(x+w/2-square_height/2, y+h-square_height/2, stroke_width, square_height, "sq7_"+ele.idable.id, svg.NS_RESIZABLE),
 			scaleboxRect(x+w-square_height/2, y+h-square_height/2, stroke_width, square_height, "sq8_"+ele.idable.id, svg.NWSE_RESIZABLE),
 		},
 		Editable: svg.DRAGGABLE,
@@ -484,32 +492,98 @@ func (ele *ScaleBox) Svg() svg.SvgElement {
 }
 
 func (ele *ScaleBox) NWResizeTo(x, y float64) {
-	//w0, h0, x0, y0 := ele.MockupElement.GetWHXY()
+	w0, h0, x0, y0 := ele.MockupElement.GetWHXY()
 	content := ele.Svg().(*svg.Group).Content
-	w := content[8].(*svg.Rect).X - x
-	h := content[8].(*svg.Rect).Y - y
+	w := w0 + x0 - x
+	h := h0 + y0 - y
 
-	content[1].MoveTo(x, y)
-	content[2].MoveTo((x+content[5].(*svg.Rect).X)/2, y)
-	content[3].MoveTo(x, (y+content[4].(*svg.Rect).Y)/2)
-	content[4].MoveTo(x, content[4].(*svg.Rect).Y)
-	content[5].MoveTo(content[5].(*svg.Rect).X, y)
-	content[6].MoveTo((x+content[5].(*svg.Rect).X)/2, content[4].(*svg.Rect).Y)
-	content[7].MoveTo(content[5].(*svg.Rect).X, (y+content[4].(*svg.Rect).Y)/2)
+	content[1].MoveTo(x-square_height/2, y-square_height/2)
+	content[2].MoveTo((x+content[8].(*svg.Rect).X)/2-square_height/2, y-square_height/2)
+	content[3].MoveTo(content[8].(*svg.Rect).X, y-square_height/2)
+	content[4].MoveTo(x-square_height/2, (y+content[8].(*svg.Rect).Y)/2)
+	content[5].MoveTo(content[8].(*svg.Rect).X, (y+content[8].(*svg.Rect).Y)/2)
+	content[6].MoveTo(x-square_height/2, content[8].(*svg.Rect).Y)
+	content[7].MoveTo((x+content[8].(*svg.Rect).X)/2-square_height/2, content[8].(*svg.Rect).Y)
 
-	//	content[0].(*svg.Path).SetD([]svg.PathItem{
-	//		{Action: svg.MOVETO, Point: svg.NewPoint(x+square_height/2, y+square_height/2)},
-	//		{Action: svg.LINETO, Point: svg.NewPoint(x+square_height/2, y+h+square_height/2)},
-	//		{Action: svg.LINETO, Point: svg.NewPoint(x+w+square_height/2, y+h+square_height/2)},
-	//		{Action: svg.LINETO, Point: svg.NewPoint(x+w+square_height/2, y+square_height/2)},
-	//		{Action: svg.CLOSEPATH},
-	//	})
+	ele.MockupElement.ResizeTo(x, y, w, h)
+}
 
-	//	w = w * 0.6
-	//	h = h * 0.6
-	//	x = x + w/3
-	//	y = y + h/3
-	println(w, h)
+func (ele *ScaleBox) NResizeTo(x, y float64) {
+	w0, h0, x0, y0 := ele.MockupElement.GetWHXY()
+	content := ele.Svg().(*svg.Group).Content
+
+	h := h0 + y0 - y
+
+	content[1].MoveTo(x0-square_height/2, y-square_height/2)
+	content[2].MoveTo(content[2].(*svg.Rect).X-square_height/2, y-square_height/2)
+	content[3].MoveTo(content[3].(*svg.Rect).X-square_height/2, y-square_height/2)
+	content[4].MoveTo(x0-square_height/2, (y+content[8].(*svg.Rect).Y)/2)
+	content[5].MoveTo(content[5].(*svg.Rect).X, (y+content[8].(*svg.Rect).Y)/2)
+
+	ele.MockupElement.ResizeTo(x0, y, w0, h)
+}
+
+func (ele *ScaleBox) NEResizeTo(x, y float64) {
+	_, h0, x0, y0 := ele.MockupElement.GetWHXY()
+	content := ele.Svg().(*svg.Group).Content
+	w := x - x0
+	h := h0 + y0 - y
+
+	content[1].MoveTo(content[6].(*svg.Rect).X, y-square_height/2)
+	content[2].MoveTo((x+content[6].(*svg.Rect).X)/2, y-square_height/2)
+	content[3].MoveTo(x-square_height/2, y-square_height/2)
+	content[4].MoveTo(content[6].(*svg.Rect).X, (y+content[6].(*svg.Rect).Y)/2)
+	content[5].MoveTo(x-square_height/2, (y+content[6].(*svg.Rect).Y)/2)
+	content[7].MoveTo((x+content[6].(*svg.Rect).X)/2, content[6].(*svg.Rect).Y)
+	content[8].MoveTo(x-square_height/2, content[6].(*svg.Rect).Y)
+
+	ele.MockupElement.ResizeTo(x0, y, w, h)
+}
+
+func (ele *ScaleBox) WResizeTo(x, y float64) {
+	w0, h0, x0, y0 := ele.MockupElement.GetWHXY()
+	content := ele.Svg().(*svg.Group).Content
+
+	w := w0 + x0 - x
+
+	content[1].MoveTo(x-square_height/2, content[1].(*svg.Rect).Y)
+	content[2].MoveTo((x+content[3].(*svg.Rect).X)/2, content[3].(*svg.Rect).Y)
+	content[4].MoveTo(x-square_height/2, content[4].(*svg.Rect).Y)
+	content[6].MoveTo(x-square_height/2, content[6].(*svg.Rect).Y)
+	content[7].MoveTo((x+content[3].(*svg.Rect).X)/2, content[7].(*svg.Rect).Y)
+
+	ele.MockupElement.ResizeTo(x, y0, w, h0)
+}
+
+func (ele *ScaleBox) EResizeTo(x, y float64) {
+	_, h0, x0, y0 := ele.MockupElement.GetWHXY()
+	content := ele.Svg().(*svg.Group).Content
+
+	w := x - x0
+
+	content[3].MoveTo(x-square_height/2, content[3].(*svg.Rect).Y)
+	content[2].MoveTo((x0+content[3].(*svg.Rect).X)/2, content[3].(*svg.Rect).Y)
+	content[5].MoveTo(x-square_height/2, content[5].(*svg.Rect).Y)
+	content[7].MoveTo((x0+content[3].(*svg.Rect).X)/2, content[7].(*svg.Rect).Y)
+	content[8].MoveTo(x-square_height/2, content[8].(*svg.Rect).Y)
+
+	ele.MockupElement.ResizeTo(x0, y0, w, h0)
+}
+
+func (ele *ScaleBox) SWResizeTo(x, y float64) {
+	w0, _, x0, y0 := ele.MockupElement.GetWHXY()
+	content := ele.Svg().(*svg.Group).Content
+	w := w0 + x0 - x
+	h := y - y0
+
+	//content[1].MoveTo(x-square_height/2, y-square_height/2)
+	//content[2].MoveTo((x+content[8].(*svg.Rect).X)/2-square_height/2, y-square_height/2)
+	//content[3].MoveTo(content[8].(*svg.Rect).X, y-square_height/2)
+	//content[4].MoveTo(x-square_height/2, (y+content[8].(*svg.Rect).Y)/2)
+	//content[5].MoveTo(content[8].(*svg.Rect).X, (y+content[8].(*svg.Rect).Y)/2)
+	content[6].MoveTo(x-square_height/2, y-square_height/2)
+	//content[7].MoveTo((x+content[8].(*svg.Rect).X)/2-square_height/2, content[8].(*svg.Rect).Y)
+
 	ele.MockupElement.ResizeTo(x, y, w, h)
 }
 

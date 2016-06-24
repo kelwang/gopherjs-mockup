@@ -79,15 +79,12 @@ func (ed *Editable) BindEvents(m map[string]MockupElement) {
 
 	jQuery(document).On(jquery.MOUSEDOWN, svg.NESW_RESIZABLE.JqSelector(), ed.startResize)
 	jQuery(document).On(jquery.MOUSEUP, svg.NESW_RESIZABLE.JqSelector(), ed.stopResize)
-	jQuery(document).On(jquery.MOUSEOUT, svg.NESW_RESIZABLE.JqSelector(), ed.stopResize)
 
 	jQuery(document).On(jquery.MOUSEDOWN, svg.NS_RESIZABLE.JqSelector(), ed.startResize)
 	jQuery(document).On(jquery.MOUSEUP, svg.NS_RESIZABLE.JqSelector(), ed.stopResize)
-	jQuery(document).On(jquery.MOUSEOUT, svg.NS_RESIZABLE.JqSelector(), ed.stopResize)
 
 	jQuery(document).On(jquery.MOUSEDOWN, svg.EW_RESIZABLE.JqSelector(), ed.startResize)
 	jQuery(document).On(jquery.MOUSEUP, svg.EW_RESIZABLE.JqSelector(), ed.stopResize)
-	jQuery(document).On(jquery.MOUSEOUT, svg.EW_RESIZABLE.JqSelector(), ed.stopResize)
 }
 
 func (ed *Editable) stopResize(e jquery.Event) {
@@ -143,10 +140,24 @@ func (ed *Editable) dragging(e jquery.Event, m map[string]MockupElement) {
 
 	if ed.Scalable != scalableNill {
 		id := ed.Scalable.Attr("id")
-		//sqr := id[2:3]
+		sqr := id[2:3]
 		id = id[4:]
 		ele := m[id]
-		ele.(*ScaleBox).NWResizeTo(clientX, clientY)
+		switch sqr {
+		case "1":
+			ele.(*ScaleBox).NWResizeTo(clientX, clientY)
+		case "2":
+			ele.(*ScaleBox).NResizeTo(clientX, clientY)
+		case "3":
+			ele.(*ScaleBox).NEResizeTo(clientX, clientY)
+		case "4":
+			ele.(*ScaleBox).WResizeTo(clientX, clientY)
+		case "5":
+			ele.(*ScaleBox).EResizeTo(clientX, clientY)
+		case "6":
+			ele.(*ScaleBox).SWResizeTo(clientX, clientY)
+		}
+
 	}
 }
 
