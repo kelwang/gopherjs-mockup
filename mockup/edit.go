@@ -64,7 +64,6 @@ var scalableNill = Scalable{JQuery: jQuery(nil)}
 func (ed *Editable) BindEvents(m map[string]MockupElement) {
 	//dragging
 	jQuery(document).On(jquery.MOUSEDOWN, svg.DRAGGABLE.JqSelector(), ed.startDragging)
-	jQuery(document).On(jquery.MOUSEUP, svg.DRAGGABLE.JqSelector(), ed.stopDragging)
 	jQuery(document).On(jquery.MOUSEMOVE, func(e jquery.Event) { ed.dragging(e, m) })
 
 	//scaling
@@ -74,24 +73,13 @@ func (ed *Editable) BindEvents(m map[string]MockupElement) {
 	jQuery(document).On(jquery.MOUSEOVER, svg.NWSE_RESIZABLE.JqSelector(), ed.nwseResizeMouseOver)
 
 	jQuery(document).On(jquery.MOUSEDOWN, svg.NWSE_RESIZABLE.JqSelector(), ed.startResize)
-	jQuery(document).On(jquery.MOUSEUP, svg.NWSE_RESIZABLE.JqSelector(), ed.stopResize)
-	//jQuery(document).On(jquery.MOUSEOUT, svg.NWSE_RESIZABLE.JqSelector(), ed.stopResize)
-
 	jQuery(document).On(jquery.MOUSEDOWN, svg.NESW_RESIZABLE.JqSelector(), ed.startResize)
-	jQuery(document).On(jquery.MOUSEUP, svg.NESW_RESIZABLE.JqSelector(), ed.stopResize)
-
 	jQuery(document).On(jquery.MOUSEDOWN, svg.NS_RESIZABLE.JqSelector(), ed.startResize)
-	jQuery(document).On(jquery.MOUSEUP, svg.NS_RESIZABLE.JqSelector(), ed.stopResize)
-
 	jQuery(document).On(jquery.MOUSEDOWN, svg.EW_RESIZABLE.JqSelector(), ed.startResize)
-	jQuery(document).On(jquery.MOUSEUP, svg.EW_RESIZABLE.JqSelector(), ed.stopResize)
-}
 
-func (ed *Editable) stopResize(e jquery.Event) {
-	if ed.Scalable != scalableNill {
-		println("stop scaling")
-		ed.Scalable = scalableNill
-	}
+	// stopping
+	jQuery(document).On(jquery.MOUSEUP, ed.stopDraggingResize)
+
 }
 
 func (ed *Editable) startResize(e jquery.Event) {
@@ -156,6 +144,10 @@ func (ed *Editable) dragging(e jquery.Event, m map[string]MockupElement) {
 			ele.(*ScaleBox).EResizeTo(clientX, clientY)
 		case "6":
 			ele.(*ScaleBox).SWResizeTo(clientX, clientY)
+		case "7":
+			ele.(*ScaleBox).SResizeTo(clientX, clientY)
+		case "8":
+			ele.(*ScaleBox).SEesizeTo(clientX, clientY)
 		}
 
 	}
@@ -170,7 +162,12 @@ func (ed *Editable) startDragging(e jquery.Event) {
 
 }
 
-func (ed *Editable) stopDragging(e jquery.Event) {
-	jQuery(e.CurrentTarget).SetCss("cursor", "auto")
-	ed.Movable = movableNil
+func (ed *Editable) stopDraggingResize(e jquery.Event) {
+	jQuery(e.CurrentTarget).SetCss("cursor", "pointer")
+	if ed.Movable != movableNil {
+		ed.Movable = movableNil
+	}
+	if ed.Scalable != scalableNill {
+		ed.Scalable = scalableNill
+	}
 }

@@ -576,15 +576,47 @@ func (ele *ScaleBox) SWResizeTo(x, y float64) {
 	w := w0 + x0 - x
 	h := y - y0
 
-	//content[1].MoveTo(x-square_height/2, y-square_height/2)
-	//content[2].MoveTo((x+content[8].(*svg.Rect).X)/2-square_height/2, y-square_height/2)
-	//content[3].MoveTo(content[8].(*svg.Rect).X, y-square_height/2)
-	//content[4].MoveTo(x-square_height/2, (y+content[8].(*svg.Rect).Y)/2)
-	//content[5].MoveTo(content[8].(*svg.Rect).X, (y+content[8].(*svg.Rect).Y)/2)
+	content[1].MoveTo(x-square_height/2, y0)
+	content[2].MoveTo((x+content[3].(*svg.Rect).X)/2-square_height/2, y0)
+	content[4].MoveTo(x-square_height/2, (y+y0)/2)
+	content[5].MoveTo(content[3].(*svg.Rect).X, (y+content[3].(*svg.Rect).Y)/2)
 	content[6].MoveTo(x-square_height/2, y-square_height/2)
-	//content[7].MoveTo((x+content[8].(*svg.Rect).X)/2-square_height/2, content[8].(*svg.Rect).Y)
+	content[7].MoveTo((x+content[3].(*svg.Rect).X)/2, y-square_height/2)
+	content[8].MoveTo(content[3].(*svg.Rect).X, y-square_height/2)
 
-	ele.MockupElement.ResizeTo(x, y, w, h)
+	ele.MockupElement.ResizeTo(x, y-h, w, h)
+}
+
+func (ele *ScaleBox) SResizeTo(x, y float64) {
+	w0, _, x0, y0 := ele.MockupElement.GetWHXY()
+	content := ele.Svg().(*svg.Group).Content
+	h := y - y0
+
+	content[4].MoveTo(x0-square_height/2, (y+content[3].(*svg.Rect).Y)/2)
+	content[5].MoveTo(content[3].(*svg.Rect).X, (y+content[3].(*svg.Rect).Y)/2)
+	content[6].MoveTo(x0-square_height/2, y-square_height/2)
+	content[7].MoveTo(content[2].(*svg.Rect).X, y-square_height/2)
+	content[8].MoveTo(content[3].(*svg.Rect).X, y-square_height/2)
+
+	ele.MockupElement.ResizeTo(x0, y0, w0, h)
+}
+
+func (ele *ScaleBox) SEesizeTo(x, y float64) {
+	_, _, x0, y0 := ele.MockupElement.GetWHXY()
+	content := ele.Svg().(*svg.Group).Content
+	w := x - x0
+	h := y - y0
+
+	content[2].MoveTo((x+x0)/2, y0-square_height/2)
+	content[3].MoveTo(x-square_height/2, content[3].(*svg.Rect).Y)
+	content[4].MoveTo(x0-square_height/2, (y+content[3].(*svg.Rect).Y)/2)
+	content[5].MoveTo(content[3].(*svg.Rect).X, (y+content[3].(*svg.Rect).Y)/2)
+	content[6].MoveTo(x0-square_height/2, y-square_height/2)
+	content[7].MoveTo((x+x0-square_height/2)/2, y-square_height/2)
+	content[8].MoveTo(content[3].(*svg.Rect).X, y-square_height/2)
+
+	ele.MockupElement.ResizeTo(x0, y0, w, h)
+
 }
 
 func scaleboxRect(x, y, stroke_width, square_height float64, id string, ed svg.Editable) *svg.Rect {
