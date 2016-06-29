@@ -200,6 +200,7 @@ const (
 	NS_RESIZABLE
 	NESW_RESIZABLE
 	NWSE_RESIZABLE
+	LINE_VERTEX
 )
 
 var editable_class = []string{
@@ -211,6 +212,7 @@ var editable_class = []string{
 	"ns-resizable",
 	"nesw-resizable",
 	"nwse-resizable",
+	"line-vertex",
 }
 
 //choose only 1
@@ -393,6 +395,24 @@ func (se *Line) MoveTo(x, y float64) {
 		"x2": se.X2,
 		"y2": se.Y2,
 	})
+}
+
+func (se *Line) PointTo(x, y float64, pt int) {
+	if pt == 1 {
+		se.X1 = x
+		se.Y1 = y
+		jQuery("#" + se.ID).SetAttr(js.M{
+			"x1": se.X1,
+			"y1": se.Y1,
+		})
+	} else {
+		se.X2 = x
+		se.Y2 = y
+		jQuery("#" + se.ID).SetAttr(js.M{
+			"x2": se.X2,
+			"y2": se.Y2,
+		})
+	}
 }
 
 func (se *Line) ResizeTo(w, h float64) {

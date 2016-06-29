@@ -66,7 +66,6 @@ func enableControl(m map[string]mockup.MockupElement) {
 func wrapLinable(e jquery.Event, m map[string]mockup.MockupElement) {
 	id := jQuery(e.CurrentTarget).Attr("id")
 	if mockupE, ok := m[id]; ok {
-		println("ok")
 		border := mockup.NewScaleLine(mockupE)
 		m[mockup.EditablePrefix+id] = border
 		jQuery("#" + id).ReplaceWith(border.Svg().Jq())

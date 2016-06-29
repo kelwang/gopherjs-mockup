@@ -433,6 +433,17 @@ func (ele *line) ResizeTo(x, y, w, h float64) {
 
 }
 
+func (ele *line) PointTo(x, y float64, pt int) {
+	if pt == 1 {
+		ele.BaseElement.ResizeTo(ele.BaseElement.Position.X-x+ele.BaseElement.Dimension.Width, ele.BaseElement.Position.Y-y+ele.BaseElement.Dimension.Height)
+		ele.BaseElement.MoveTo(x, y)
+
+	} else {
+		ele.BaseElement.ResizeTo(x-ele.BaseElement.Position.X, y-ele.BaseElement.Position.Y)
+	}
+	ele.Svg().(*svg.Line).PointTo(x, y, pt)
+}
+
 type ScaleBox struct {
 	idable
 	MockupElement
@@ -659,8 +670,8 @@ func (ele *ScaleLine) Svg() svg.SvgElement {
 	return &svg.Group{
 		Content: []svg.SvgElement{
 			ele.line.Svg(),
-			scaleboxRect(x-square_height/2, y-square_height/2, stroke_width, square_height, ele.idable.id+"_sq1", svg.DRAGGABLE),
-			scaleboxRect(x+w-square_height/2, y+h-square_height/2, stroke_width, square_height, ele.idable.id+"_sq8", svg.DRAGGABLE),
+			scaleboxRect(x-square_height/2, y-square_height/2, stroke_width, square_height, "sql1_"+ele.idable.id, svg.LINE_VERTEX),
+			scaleboxRect(x+w-square_height/2, y+h-square_height/2, stroke_width, square_height, "sql2_"+ele.idable.id, svg.LINE_VERTEX),
 		},
 		Editable: svg.DRAGGABLE,
 		Fillable: svg.NewFillable(WHITE, 1),
@@ -671,13 +682,14 @@ func (ele *ScaleLine) Svg() svg.SvgElement {
 }
 
 func (ele *ScaleLine) MoveTo(x, y float64) {
-	content := ele.Svg().(*svg.Group).Content
-	w, h, _, _ := ele.line.GetWHXY()
-	ele.line.MoveTo(x, y)
-	content[1].MoveTo(x-square_height/2, y-square_height/2)
-	content[2].MoveTo(x+w-square_height/2, y+h-square_height/2)
 }
 
 func (ele *ScaleLine) ResizeTo(x, y, w, h float64) {
 
+}
+
+func (ele *ScaleLine) PointTo(x, y float64, sqr int) {
+	content := ele.Svg().(*svg.Group).Content
+	content[sqr].MoveTo(x-square_height/2, y-square_height/2)
+	ele.line.PointTo(x, y, sqr)
 }

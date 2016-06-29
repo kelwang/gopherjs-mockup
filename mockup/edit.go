@@ -27,6 +27,7 @@ func jsInt(s interface{}) int {
 type Editable struct {
 	Movable
 	Scalable
+	LineMovable
 	Border
 }
 
@@ -39,8 +40,9 @@ type Border struct {
 
 func NewEditable(x1, y1, x2, y2 float64) *Editable {
 	return &Editable{
-		Movable:  movableNil,
-		Scalable: scalableNill,
+		Movable:     movableNil,
+		Scalable:    scalableNill,
+		LineMovable: lineMovableNil,
 		Border: Border{
 			X1: x1,
 			Y1: y1,
@@ -48,6 +50,10 @@ func NewEditable(x1, y1, x2, y2 float64) *Editable {
 			Y2: y2,
 		},
 	}
+}
+
+type LineMovable struct {
+	jquery.JQuery
 }
 
 type Movable struct {
@@ -60,6 +66,7 @@ type Scalable struct {
 
 var movableNil = Movable{JQuery: jQuery(nil)}
 var scalableNill = Scalable{JQuery: jQuery(nil)}
+var lineMovableNil = LineMovable{JQuery: jQuery(nil)}
 
 func (ed *Editable) BindEvents(m map[string]MockupElement) {
 	//dragging
@@ -77,6 +84,9 @@ func (ed *Editable) BindEvents(m map[string]MockupElement) {
 	jQuery(document).On(jquery.MOUSEDOWN, svg.NS_RESIZABLE.JqSelector(), ed.startResize)
 	jQuery(document).On(jquery.MOUSEDOWN, svg.EW_RESIZABLE.JqSelector(), ed.startResize)
 
+	//line moving
+	jQuery(document).On(jquery.MOUSEDOWN, svg.LINE_VERTEX.JqSelector(), ed.startLineEditing)
+
 	// stopping
 	jQuery(document).On(jquery.MOUSEUP, ed.stopDraggingResize)
 
@@ -85,14 +95,13 @@ func (ed *Editable) BindEvents(m map[string]MockupElement) {
 func (ed *Editable) startResize(e jquery.Event) {
 	ed.Movable = movableNil
 	ed.Scalable = Scalable{JQuery: jQuery(e.CurrentTarget)}
+	ed.LineMovable = lineMovableNil
 }
 
-func (ed *Editable) resizing(e jquery.Event, m map[string]MockupElement) {
-	this := jQuery(e.CurrentTarget)
-	id := this.Attr("id")
-	ele := m[id[4:]]
-	println(ele.Id())
-
+func (ed *Editable) startLineEditing(e jquery.Event) {
+	ed.Movable = movableNil
+	ed.Scalable = scalableNill
+	ed.LineMovable = LineMovable{JQuery: jQuery(e.CurrentTarget)}
 }
 
 func (ed *Editable) ewResizeMouseOver(e jquery.Event) {
@@ -149,13 +158,19 @@ func (ed *Editable) dragging(e jquery.Event, m map[string]MockupElement) {
 		case "8":
 			ele.(*ScaleBox).SEesizeTo(clientX, clientY)
 		}
-
 	}
+
+	if ed.LineMovable != lineMovableNil {
+		id := ed.LineMovable.Attr("id")
+		ele := m[id[5:]]
+		sqr := id[3:4]
+		ele.(*ScaleLine).PointTo(clientX, clientY, jsInt(sqr))
+	}
+
 }
 
 func (ed *Editable) startDragging(e jquery.Event) {
 	if ed.Scalable == scalableNill {
-		println("start dragging")
 		ed.Movable = Movable{JQuery: jQuery(e.CurrentTarget)}
 		ed.Movable.SetCss("cursor", "move")
 	}
@@ -169,5 +184,8 @@ func (ed *Editable) stopDraggingResize(e jquery.Event) {
 	}
 	if ed.Scalable != scalableNill {
 		ed.Scalable = scalableNill
+	}
+	if ed.LineMovable != lineMovableNil {
+		ed.LineMovable = lineMovableNil
 	}
 }
