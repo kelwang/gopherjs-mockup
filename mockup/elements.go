@@ -19,11 +19,12 @@ type Dimension struct {
 type MockupElement interface {
 	Svg() svg.SvgElement
 	Id() string
-
+	SetId(id string)
 	GetWHXY() (float64, float64, float64, float64)
 	MoveTo(x, y float64)
 	ResizeTo(x, y, w, h float64)
 	GetBase() BaseElement
+	SetEditable(e svg.Editable)
 }
 
 type BaseElement struct {
@@ -100,11 +101,20 @@ func (i *idable) SetId(id string) {
 	(*i).id = id
 }
 
+type editable struct {
+	Editable svg.Editable
+}
+
+func (ed *editable) SetEditable(e svg.Editable) {
+	(*ed).Editable = e
+}
+
 type textBox struct {
 	idable
 	BaseElement
 	Text
 	Stroke
+	editable
 }
 
 var (
@@ -193,6 +203,7 @@ type button struct {
 	BaseElement
 	Text
 	Stroke
+	editable
 }
 
 func NewButton(w, h, x, y float64, content string, id string) *button {
@@ -274,6 +285,7 @@ type box struct {
 	idable
 	BaseElement
 	Stroke
+	editable
 }
 
 func NewBox(w, h, x, y float64, id string) *box {
@@ -325,10 +337,10 @@ type label struct {
 	BaseElement
 	Text
 	Stroke
-	svg.Editable
+	editable
 }
 
-func NewLabel(w, h, x, y float64, content string, id string, editable svg.Editable) *label {
+func NewLabel(w, h, x, y float64, content string, id string, e svg.Editable) *label {
 	return &label{
 		idable:      idable{id: id},
 		BaseElement: newBaseElement(w, h, x, y),
@@ -340,13 +352,13 @@ func NewLabel(w, h, x, y float64, content string, id string, editable svg.Editab
 			Thickness: Medium,
 			Color:     DARKGREY,
 		},
-		Editable: editable,
+		editable: editable{Editable: e},
 	}
 }
 
 func (ele *label) Svg() svg.SvgElement {
 	return &svg.Group{
-		Editable: ele.Editable,
+		Editable: ele.editable.Editable,
 		Idable: svg.Idable{
 			ID: ele.id,
 		},
@@ -397,8 +409,10 @@ func (ele *label) ResizeTo(x, y, w, h float64) {
 
 type line struct {
 	idable
+	editable
 	BaseElement
 	Stroke
+	svg.Editable
 }
 
 func NewLine(w, h, x, y float64, id string) *line {
@@ -463,6 +477,10 @@ func NewScaleBox(mockupElement MockupElement) *ScaleBox {
 
 func (ele *ScaleBox) Id() string {
 	return ele.idable.id
+}
+
+func (ele *ScaleBox) SetId(id string) {
+	ele.idable.SetId(id)
 }
 
 func (ele *ScaleBox) MoveTo(x, y float64) {
@@ -700,30 +718,19 @@ func (ele *ScaleLine) PointTo(x, y float64, sqr int) {
 }
 
 type CloneBox struct {
-	idable
 	MockupElement
 }
 
 func newCloneBox(ele MockupElement, id string) *CloneBox {
+	ele.SetId(id)
+	ele.SetEditable(svg.EDITABLE)
 	return &CloneBox{
-		idable: idable{
-			id: id,
-		},
 		MockupElement: ele,
 	}
 }
 
-func (ele *CloneBox) Id() string {
-	return ele.idable.id
-}
-
 func (ele *CloneBox) Svg() svg.SvgElement {
-	mockup := ele.MockupElement
-	eleSvg := ele.MockupElement.Svg()
-	eleSvg.(*svg.Group).Editable = svg.EDITABLE
-	eleSvg.(*svg.Group).ID = ele.idable.id
-	println(eleSvg.String())
-	return mockup.Svg()
+	return ele.MockupElement.Svg()
 }
 
 func (ele *CloneBox) MoveTo(x, y float64) {
