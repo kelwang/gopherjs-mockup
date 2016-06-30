@@ -16,9 +16,9 @@ func main() {
 	container := initPanel()
 
 	label1 := mockup.NewLabel(180, 20, 400, 158, "big text a lal ha", "E1", svg.EDITABLE)
-	textbox1 := mockup.NewTextBox(160, 40, 400, 300, "textbox 1", "E2")
-	button1 := mockup.NewButton(160, 40, 400, 500, "button 1", "E3")
-	box1 := mockup.NewBox(100, 100, 800, 158, "E4")
+	textbox1 := mockup.NewTextBox(160, 40, 400, 300, "textbox 1", "E2", svg.EDITABLE)
+	button1 := mockup.NewButton(160, 40, 400, 500, "button 1", "E3", svg.EDITABLE)
+	box1 := mockup.NewBox(100, 100, 800, 158, "E4", svg.EDITABLE)
 	line1 := mockup.NewLine(100, 10, 800, 400, "E5")
 
 	container.Content = append(container.Content,
@@ -45,23 +45,23 @@ func main() {
 }
 
 func enableControl(m map[string]mockup.MockupElement) {
-	jQuery(document).On(jquery.DBLCLICK, svg.EDITABLE.JqSelector(), func(e jquery.Event) {
+	jQuery(document).On(jquery.CLICK, svg.EDITABLE.JqSelector(), func(e jquery.Event) {
 		wrapEditable(e, m)
 	})
 
-	jQuery(document).On(jquery.DBLCLICK, svg.LINABLE.JqSelector(), func(e jquery.Event) {
+	jQuery(document).On(jquery.CLICK, svg.LINABLE.JqSelector(), func(e jquery.Event) {
 		wrapLinable(e, m)
 	})
 
-	jQuery(document).On(jquery.DBLCLICK, "."+editing_class, func(e jquery.Event) {
+	jQuery(document).On(jquery.CLICK, "."+editing_class, func(e jquery.Event) {
 		unwrapEditable(e, m)
 	})
 
-	jQuery(document).On(jquery.DBLCLICK, "."+line_editing_class, func(e jquery.Event) {
+	jQuery(document).On(jquery.CLICK, "."+line_editing_class, func(e jquery.Event) {
 		unwrapLinable(e, m)
 	})
 
-	mockup.NewEditable(260, 5, 1260, 805).BindEvents(m)
+	mockup.NewControlEditable(260, 5, 1260, 805).BindEvents(m)
 }
 
 func wrapLinable(e jquery.Event, m map[string]mockup.MockupElement) {
@@ -104,9 +104,9 @@ func unwrapEditable(e jquery.Event, m map[string]mockup.MockupElement) {
 }
 
 func initToolBar(container svg.Svg, m map[string]mockup.MockupElement) []svg.SvgElement {
-	textboxTool := mockup.NewTextBox(60, 20, 30, 20, "textbox", "T1")
-	buttonTool := mockup.NewButton(60, 20, 150, 20, "button", "T2")
-	boxTool := mockup.NewBox(60, 60, 30, 60, "T3")
+	textboxTool := mockup.NewTextBox(60, 20, 30, 20, "textbox", "T1", svg.CLONABLE)
+	buttonTool := mockup.NewButton(60, 20, 150, 20, "button", "T2", svg.CLONABLE)
+	boxTool := mockup.NewBox(60, 60, 30, 60, "T3", svg.CLONABLE)
 	labelTool := mockup.NewLabel(60, 20, 160, 90, "label", "T4", svg.CLONABLE)
 	lineTool := mockup.NewLine(60, 0, 30, 160, "T5")
 

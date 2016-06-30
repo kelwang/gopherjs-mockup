@@ -24,7 +24,17 @@ func jsInt(s interface{}) int {
 	return 0
 }
 
-type Editable struct {
+func jsString(a interface{}) string {
+	if a != nil {
+		s := js.Global.Call("String", a).String()
+		if s != "undefined" && s != "null" {
+			return s
+		}
+	}
+	return ""
+}
+
+type ControlEditable struct {
 	Movable
 	Scalable
 	LineMovable
@@ -39,8 +49,8 @@ type Border struct {
 	Y2 float64
 }
 
-func NewEditable(x1, y1, x2, y2 float64) *Editable {
-	return &Editable{
+func NewControlEditable(x1, y1, x2, y2 float64) *ControlEditable {
+	return &ControlEditable{
 		Movable:     movableNil,
 		Scalable:    scalableNill,
 		LineMovable: lineMovableNil,
@@ -75,7 +85,7 @@ var scalableNill = Scalable{JQuery: jQuery(nil)}
 var lineMovableNil = LineMovable{JQuery: jQuery(nil)}
 var clonableNil = Clonable{JQuery: jQuery(nil)}
 
-func (ed *Editable) BindEvents(m map[string]MockupElement) {
+func (ed *ControlEditable) BindEvents(m map[string]MockupElement) {
 	//dragging
 	jQuery(document).On(jquery.MOUSEDOWN, svg.DRAGGABLE.JqSelector(), ed.startDragging)
 	jQuery(document).On(jquery.MOUSEMOVE, func(e jquery.Event) { ed.dragging(e, m) })
@@ -104,53 +114,54 @@ func (ed *Editable) BindEvents(m map[string]MockupElement) {
 
 }
 
-func (ed *Editable) startClone(e jquery.Event, m map[string]MockupElement) {
+func (ed *ControlEditable) startClone(e jquery.Event, m map[string]MockupElement) {
 	ed.Movable = movableNil
 	ed.Scalable = scalableNill
 	ed.LineMovable = lineMovableNil
 	id := jQuery(e.CurrentTarget).Attr("id")
 	ele := m[id]
 
-	clo := newCloneBox(ele, "M1")
-	m["M1"] = clo
+	count := len(m)
+	nid := "M" + jsString(count)
+	clo := newCloneBox(ele, nid)
+	m[nid] = clo
 	cloJq := clo.Svg().Jq()
 	jQuery("svg").Append(cloJq)
 
 	ed.Clonable = Clonable{JQuery: cloJq}
 }
 
-func (ed *Editable) startResize(e jquery.Event) {
+func (ed *ControlEditable) startResize(e jquery.Event) {
 	ed.Movable = movableNil
 	ed.Scalable = Scalable{JQuery: jQuery(e.CurrentTarget)}
 	ed.LineMovable = lineMovableNil
 	ed.Clonable = clonableNil
 }
 
-func (ed *Editable) startLineEditing(e jquery.Event) {
+func (ed *ControlEditable) startLineEditing(e jquery.Event) {
 	ed.Movable = movableNil
 	ed.Scalable = scalableNill
 	ed.LineMovable = LineMovable{JQuery: jQuery(e.CurrentTarget)}
 	ed.Clonable = clonableNil
 }
 
-func (ed *Editable) ewResizeMouseOver(e jquery.Event) {
+func (ed *ControlEditable) ewResizeMouseOver(e jquery.Event) {
 	jQuery(e.CurrentTarget).SetCss("cursor", "ew-resize")
 }
 
-func (ed *Editable) nsResizeMouseOver(e jquery.Event) {
+func (ed *ControlEditable) nsResizeMouseOver(e jquery.Event) {
 	jQuery(e.CurrentTarget).SetCss("cursor", "ns-resize")
 }
 
-func (ed *Editable) neswResizeMouseOver(e jquery.Event) {
+func (ed *ControlEditable) neswResizeMouseOver(e jquery.Event) {
 	jQuery(e.CurrentTarget).SetCss("cursor", "nesw-resize")
 }
 
-func (ed *Editable) nwseResizeMouseOver(e jquery.Event) {
+func (ed *ControlEditable) nwseResizeMouseOver(e jquery.Event) {
 	jQuery(e.CurrentTarget).SetCss("cursor", "nwse-resize")
 }
 
-func (ed *Editable) dragging(e jquery.Event, m map[string]MockupElement) {
-
+func (ed *ControlEditable) dragging(e jquery.Event, m map[string]MockupElement) {
 	clientX := e.Get("offsetX").Float()
 	clientY := e.Get("offsetY").Float()
 
@@ -200,26 +211,32 @@ func (ed *Editable) dragging(e jquery.Event, m map[string]MockupElement) {
 		id := ed.Clonable.Attr("id")
 		ele := m[id]
 		ele.MoveTo(clientX, clientY)
-		println(id)
 	}
 
 }
 
-func (ed *Editable) startDragging(e jquery.Event) {
-	if ed.Scalable == scalableNill {
+func (ed *ControlEditable) startDragging(e jquery.Event) {
+	if ed.Scalable == scalableNill && ed.LineMovable == lineMovableNil {
 		ed.Movable = Movable{JQuery: jQuery(e.CurrentTarget)}
 		ed.Movable.SetCss("cursor", "move")
 	}
 
-	ed.Scalable = scalableNill
-	ed.LineMovable = lineMovableNil
 	ed.Clonable = clonableNil
 }
 
-func (ed *Editable) stopDraggingResize(e jquery.Event) {
+func (ed *ControlEditable) stopDraggingResize(e jquery.Event) {
+	println("stop")
 	jQuery(e.CurrentTarget).SetCss("cursor", "pointer")
-	ed.Movable = movableNil
-	ed.Scalable = scalableNill
-	ed.LineMovable = lineMovableNil
-	ed.Clonable = clonableNil
+	if ed.Movable != movableNil {
+		ed.Movable = movableNil
+	}
+	if ed.Scalable != scalableNill {
+		ed.Scalable = scalableNill
+	}
+	if ed.LineMovable != lineMovableNil {
+		ed.LineMovable = lineMovableNil
+	}
+	if ed.Clonable != clonableNil {
+		ed.Clonable = clonableNil
+	}
 }

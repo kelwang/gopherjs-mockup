@@ -122,7 +122,7 @@ var (
 	DARKGREY = "#555"
 )
 
-func NewTextBox(w, h, x, y float64, content string, id string) *textBox {
+func NewTextBox(w, h, x, y float64, content string, id string, e svg.Editable) *textBox {
 	return &textBox{
 		BaseElement: newBaseElement(w, h, x, y),
 		Text: Text{
@@ -133,13 +133,14 @@ func NewTextBox(w, h, x, y float64, content string, id string) *textBox {
 			Thickness: Medium,
 			Color:     DARKGREY,
 		},
-		idable: idable{id: id},
+		idable:   idable{id: id},
+		editable: editable{Editable: e},
 	}
 }
 
 func (ele *textBox) Svg() svg.SvgElement {
 	return &svg.Group{
-		Editable: svg.EDITABLE,
+		Editable: ele.editable.Editable,
 		Idable: svg.Idable{
 			ID: ele.id,
 		},
@@ -206,9 +207,10 @@ type button struct {
 	editable
 }
 
-func NewButton(w, h, x, y float64, content string, id string) *button {
+func NewButton(w, h, x, y float64, content string, id string, e svg.Editable) *button {
 	return &button{
 		idable:      idable{id: id},
+		editable:    editable{Editable: e},
 		BaseElement: newBaseElement(w, h, x, y),
 		Text: Text{
 			Content: content,
@@ -226,7 +228,7 @@ func (ele *button) Svg() svg.SvgElement {
 		Idable: svg.Idable{
 			ID: ele.idable.id,
 		},
-		Editable: svg.EDITABLE,
+		Editable: ele.editable.Editable,
 		Content: []svg.SvgElement{
 			&svg.Rect{
 				Width:    ele.BaseElement.Dimension.Width,
@@ -288,9 +290,10 @@ type box struct {
 	editable
 }
 
-func NewBox(w, h, x, y float64, id string) *box {
+func NewBox(w, h, x, y float64, id string, e svg.Editable) *box {
 	return &box{
 		idable:      idable{id: id},
+		editable:    editable{Editable: e},
 		BaseElement: newBaseElement(w, h, x, y),
 		Stroke: Stroke{
 			Thickness: Medium,
@@ -312,7 +315,7 @@ func (ele *box) Svg() svg.SvgElement {
 			Stroke:      ele.Stroke.Color,
 			StrokeWidth: ele.Stroke.Thickness.Float64(),
 		},
-		Editable: svg.EDITABLE,
+		Editable: ele.editable.Editable,
 		Idable: svg.Idable{
 			ID: ele.id,
 		},
