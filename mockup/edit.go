@@ -28,6 +28,7 @@ type Editable struct {
 	Movable
 	Scalable
 	LineMovable
+	Clonable
 	Border
 }
 
@@ -43,6 +44,7 @@ func NewEditable(x1, y1, x2, y2 float64) *Editable {
 		Movable:     movableNil,
 		Scalable:    scalableNill,
 		LineMovable: lineMovableNil,
+		Clonable:    clonableNil,
 		Border: Border{
 			X1: x1,
 			Y1: y1,
@@ -64,9 +66,14 @@ type Scalable struct {
 	jquery.JQuery
 }
 
+type Clonable struct {
+	jquery.JQuery
+}
+
 var movableNil = Movable{JQuery: jQuery(nil)}
 var scalableNill = Scalable{JQuery: jQuery(nil)}
 var lineMovableNil = LineMovable{JQuery: jQuery(nil)}
+var clonableNil = Clonable{JQuery: jQuery(nil)}
 
 func (ed *Editable) BindEvents(m map[string]MockupElement) {
 	//dragging
@@ -90,18 +97,40 @@ func (ed *Editable) BindEvents(m map[string]MockupElement) {
 	// stopping
 	jQuery(document).On(jquery.MOUSEUP, ed.stopDraggingResize)
 
+	// clonable
+	jQuery(document).On(jquery.MOUSEDOWN, svg.CLONABLE.JqSelector(), func(e jquery.Event) {
+		ed.startClone(e, m)
+	})
+
+}
+
+func (ed *Editable) startClone(e jquery.Event, m map[string]MockupElement) {
+	ed.Movable = movableNil
+	ed.Scalable = scalableNill
+	ed.LineMovable = lineMovableNil
+	id := jQuery(e.CurrentTarget).Attr("id")
+	ele := m[id]
+
+	clo := newCloneBox(ele, "M1")
+	m["M1"] = clo
+	cloJq := clo.Svg().Jq()
+	jQuery("svg").Append(cloJq)
+
+	ed.Clonable = Clonable{JQuery: cloJq}
 }
 
 func (ed *Editable) startResize(e jquery.Event) {
 	ed.Movable = movableNil
 	ed.Scalable = Scalable{JQuery: jQuery(e.CurrentTarget)}
 	ed.LineMovable = lineMovableNil
+	ed.Clonable = clonableNil
 }
 
 func (ed *Editable) startLineEditing(e jquery.Event) {
 	ed.Movable = movableNil
 	ed.Scalable = scalableNill
 	ed.LineMovable = LineMovable{JQuery: jQuery(e.CurrentTarget)}
+	ed.Clonable = clonableNil
 }
 
 func (ed *Editable) ewResizeMouseOver(e jquery.Event) {
@@ -167,6 +196,13 @@ func (ed *Editable) dragging(e jquery.Event, m map[string]MockupElement) {
 		ele.(*ScaleLine).PointTo(clientX, clientY, jsInt(sqr))
 	}
 
+	if ed.Clonable != clonableNil {
+		id := ed.Clonable.Attr("id")
+		ele := m[id]
+		ele.MoveTo(clientX, clientY)
+		println(id)
+	}
+
 }
 
 func (ed *Editable) startDragging(e jquery.Event) {
@@ -175,17 +211,15 @@ func (ed *Editable) startDragging(e jquery.Event) {
 		ed.Movable.SetCss("cursor", "move")
 	}
 
+	ed.Scalable = scalableNill
+	ed.LineMovable = lineMovableNil
+	ed.Clonable = clonableNil
 }
 
 func (ed *Editable) stopDraggingResize(e jquery.Event) {
 	jQuery(e.CurrentTarget).SetCss("cursor", "pointer")
-	if ed.Movable != movableNil {
-		ed.Movable = movableNil
-	}
-	if ed.Scalable != scalableNill {
-		ed.Scalable = scalableNill
-	}
-	if ed.LineMovable != lineMovableNil {
-		ed.LineMovable = lineMovableNil
-	}
+	ed.Movable = movableNil
+	ed.Scalable = scalableNill
+	ed.LineMovable = lineMovableNil
+	ed.Clonable = clonableNil
 }

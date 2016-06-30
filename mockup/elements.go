@@ -19,6 +19,7 @@ type Dimension struct {
 type MockupElement interface {
 	Svg() svg.SvgElement
 	Id() string
+
 	GetWHXY() (float64, float64, float64, float64)
 	MoveTo(x, y float64)
 	ResizeTo(x, y, w, h float64)
@@ -93,6 +94,10 @@ type idable struct {
 
 func (id idable) Id() string {
 	return id.id
+}
+
+func (i *idable) SetId(id string) {
+	(*i).id = id
 }
 
 type textBox struct {
@@ -320,10 +325,10 @@ type label struct {
 	BaseElement
 	Text
 	Stroke
-	Draggable bool
+	svg.Editable
 }
 
-func NewLabel(w, h, x, y float64, content string, id string, draggable bool) *label {
+func NewLabel(w, h, x, y float64, content string, id string, editable svg.Editable) *label {
 	return &label{
 		idable:      idable{id: id},
 		BaseElement: newBaseElement(w, h, x, y),
@@ -335,13 +340,13 @@ func NewLabel(w, h, x, y float64, content string, id string, draggable bool) *la
 			Thickness: Medium,
 			Color:     DARKGREY,
 		},
-		Draggable: draggable,
+		Editable: editable,
 	}
 }
 
 func (ele *label) Svg() svg.SvgElement {
 	return &svg.Group{
-		Editable: svg.EDITABLE,
+		Editable: ele.Editable,
 		Idable: svg.Idable{
 			ID: ele.id,
 		},
@@ -692,4 +697,35 @@ func (ele *ScaleLine) PointTo(x, y float64, sqr int) {
 	content := ele.Svg().(*svg.Group).Content
 	content[sqr].MoveTo(x-square_height/2, y-square_height/2)
 	ele.line.PointTo(x, y, sqr)
+}
+
+type CloneBox struct {
+	idable
+	MockupElement
+}
+
+func newCloneBox(ele MockupElement, id string) *CloneBox {
+	return &CloneBox{
+		idable: idable{
+			id: id,
+		},
+		MockupElement: ele,
+	}
+}
+
+func (ele *CloneBox) Id() string {
+	return ele.idable.id
+}
+
+func (ele *CloneBox) Svg() svg.SvgElement {
+	mockup := ele.MockupElement
+	eleSvg := ele.MockupElement.Svg()
+	eleSvg.(*svg.Group).Editable = svg.EDITABLE
+	eleSvg.(*svg.Group).ID = ele.idable.id
+	println(eleSvg.String())
+	return mockup.Svg()
+}
+
+func (ele *CloneBox) MoveTo(x, y float64) {
+	ele.MockupElement.MoveTo(x, y)
 }

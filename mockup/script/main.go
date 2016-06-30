@@ -14,9 +14,8 @@ var line_editing_class = "line_editing"
 
 func main() {
 	container := initPanel()
-	container.Content = initToolBar(container)
 
-	label1 := mockup.NewLabel(180, 20, 400, 158, "big text a lal ha", "E1", false)
+	label1 := mockup.NewLabel(180, 20, 400, 158, "big text a lal ha", "E1", svg.EDITABLE)
 	textbox1 := mockup.NewTextBox(160, 40, 400, 300, "textbox 1", "E2")
 	button1 := mockup.NewButton(160, 40, 400, 500, "button 1", "E3")
 	box1 := mockup.NewBox(100, 100, 800, 158, "E4")
@@ -37,6 +36,8 @@ func main() {
 		"E4": box1,
 		"E5": line1,
 	}
+
+	container.Content = initToolBar(container, m)
 
 	enableControl(m)
 	js.Global.Get("document").Call("write", container.String())
@@ -102,12 +103,19 @@ func unwrapEditable(e jquery.Event, m map[string]mockup.MockupElement) {
 	}
 }
 
-func initToolBar(container svg.Svg) []svg.SvgElement {
+func initToolBar(container svg.Svg, m map[string]mockup.MockupElement) []svg.SvgElement {
 	textboxTool := mockup.NewTextBox(60, 20, 30, 20, "textbox", "T1")
 	buttonTool := mockup.NewButton(60, 20, 150, 20, "button", "T2")
 	boxTool := mockup.NewBox(60, 60, 30, 60, "T3")
-	labelTool := mockup.NewLabel(60, 20, 160, 90, "label", "T4", false)
+	labelTool := mockup.NewLabel(60, 20, 160, 90, "label", "T4", svg.CLONABLE)
 	lineTool := mockup.NewLine(60, 0, 30, 160, "T5")
+
+	m["T1"] = textboxTool
+	m["T2"] = buttonTool
+	m["T3"] = boxTool
+	m["T4"] = labelTool
+	m["T5"] = lineTool
+
 	return append(container.Content,
 		textboxTool.Svg(),
 		buttonTool.Svg(),

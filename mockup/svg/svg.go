@@ -193,6 +193,7 @@ func (se Strokeable) Attr() js.M {
 
 const (
 	INEDITABLE Editable = 1 << iota
+	CLONABLE
 	EDITABLE
 	DRAGGABLE
 	LINABLE
@@ -205,6 +206,7 @@ const (
 
 var editable_class = []string{
 	"ineditable",
+	"clonable",
 	"editable",
 	"draggable",
 	"linable",
@@ -219,7 +221,7 @@ var editable_class = []string{
 func (editable Editable) JqSelector() string {
 	i := 0
 	for editable>>1 != 0 || editable != 0 {
-		if r := editable % 2; r == 1 {
+		if editable-editable>>1<<1 == 1 {
 			return "." + editable_class[i]
 		}
 		i++
@@ -229,6 +231,10 @@ func (editable Editable) JqSelector() string {
 }
 
 type Editable int
+
+func NewEditablePtr(e Editable) *Editable {
+	return &e
+}
 
 func (editable Editable) String() string {
 	if c := editable.Attr()["class"].(string); c != "" {
@@ -241,7 +247,7 @@ func (editable Editable) Attr() js.M {
 	i := 0
 	class := ""
 	for editable>>1 != 0 || editable != 0 {
-		if r := editable % 2; r == 1 {
+		if editable-editable>>1<<1 == 1 {
 			class += " " + editable_class[i]
 		}
 		i++
