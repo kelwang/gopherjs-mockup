@@ -15,10 +15,10 @@ var line_editing_class = "line_editing"
 func main() {
 	container := initPanel()
 
-	label1 := mockup.NewLabel(180, 20, 400, 158, "big text a lal ha", "E1", svg.EDITABLE)
-	textbox1 := mockup.NewTextBox(160, 40, 400, 300, "textbox 1", "E2", svg.EDITABLE)
-	button1 := mockup.NewButton(160, 40, 400, 500, "button 1", "E3", svg.EDITABLE)
-	box1 := mockup.NewBox(100, 100, 800, 158, "E4", svg.EDITABLE)
+	label1 := mockup.NewLabel(180, 20, 400, 158, "big text a lal ha", "E1", svg.DRAGGABLE|svg.EDITABLE)
+	textbox1 := mockup.NewTextBox(160, 40, 400, 300, "textbox 1", "E2", svg.DRAGGABLE|svg.EDITABLE)
+	button1 := mockup.NewButton(160, 40, 400, 500, "button 1", "E3", svg.DRAGGABLE|svg.EDITABLE)
+	box1 := mockup.NewBox(100, 100, 800, 158, "E4", svg.DRAGGABLE|svg.EDITABLE)
 	line1 := mockup.NewLine(100, 10, 800, 400, "E5")
 
 	container.Content = append(container.Content,

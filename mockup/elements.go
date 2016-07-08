@@ -726,7 +726,7 @@ type CloneBox struct {
 
 func newCloneBox(ele MockupElement, id string) *CloneBox {
 	ele.SetId(id)
-	ele.SetEditable(svg.EDITABLE)
+	ele.SetEditable(svg.EDITABLE | svg.DRAGGABLE)
 	return &CloneBox{
 		MockupElement: ele,
 	}
