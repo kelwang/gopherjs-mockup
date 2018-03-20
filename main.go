@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	gbuild "github.com/gopherjs/gopherjs/build"
-	"github.com/kelwang/gopherjs/tool"
+	"github.com/kelwang/gs/tool"
 )
 
 var basePath = "github.com/kelwang/gopherjs-mockup/"

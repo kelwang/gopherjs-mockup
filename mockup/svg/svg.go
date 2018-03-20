@@ -258,18 +258,18 @@ func (editable Editable) Attr() js.M {
 	}
 }
 
-type Idable struct {
+type IDAble struct {
 	ID string
 }
 
-func (id Idable) String() string {
+func (id IDAble) String() string {
 	if id.ID == "" {
 		return ""
 	}
 	return ` id="` + jsString(id.ID) + `"`
 }
 
-func (id Idable) Attr() js.M {
+func (id IDAble) Attr() js.M {
 	if id.ID == "" {
 		return js.M{}
 	}
@@ -595,7 +595,7 @@ func (se *Text) String() string {
 	return s
 }
 
-func (se *Text) Jq() jquery.JQuery {
+func (se *Text) JQ() jquery.JQuery {
 	attr := js.M{
 		"x": se.X,
 		"y": se.Y,

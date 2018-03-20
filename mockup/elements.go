@@ -106,7 +106,7 @@ type editable struct {
 }
 
 func (ed *editable) SetEditable(e svg.Editable) {
-	(*ed).Editable = e
+	ed.Editable = e
 }
 
 type textBox struct {
