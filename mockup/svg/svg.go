@@ -45,12 +45,12 @@ func (svg Svg) String() string {
 
 type SvgElement interface {
 	String() string
-	Jq() jquery.JQuery
+	JQ() jquery.JQuery
 	MoveTo(x, y float64)
 	ResizeTo(w, h float64)
 }
 
-//SvgElement
+// Rect implement SvgElement interface
 type Rect struct {
 	Width  float64 `svg:"width"`
 	Height float64 `svg:"height"`
@@ -58,7 +58,7 @@ type Rect struct {
 	Y      float64 `svg:"y"`
 	RX     float64 `svg:"rx"`
 	RY     float64 `svg:"ry"`
-	Idable
+	IDAble
 	Strokeable
 	Editable
 	Fillable fillable
@@ -82,14 +82,14 @@ func (se *Rect) String() string {
 	return s
 }
 
-func (se *Rect) Jq() jquery.JQuery {
+func (se *Rect) JQ() jquery.JQuery {
 	attr := js.M{
 		"width":  se.Width,
 		"height": se.Height,
 		"x":      se.X,
 		"y":      se.Y,
 	}
-	attr = mergeAttr(attr, se.Idable.Attr())
+	attr = mergeAttr(attr, se.IDAble.Attr())
 	attr = mergeAttr(attr, se.Fillable.Attr())
 	attr = mergeAttr(attr, se.Strokeable.Attr())
 	attr = mergeAttr(attr, se.Editable.Attr())
@@ -218,7 +218,7 @@ var editable_class = []string{
 }
 
 //choose only 1
-func (editable Editable) JqSelector() string {
+func (editable Editable) JQSelector() string {
 	i := 0
 	for editable>>1 != 0 || editable != 0 {
 		if editable-editable>>1<<1 == 1 {
@@ -363,7 +363,7 @@ type Line struct {
 	Y2 float64 `svg:"y2"`
 	Strokeable
 	Editable
-	Idable
+	IDAble
 }
 
 func (se *Line) String() string {
@@ -375,7 +375,7 @@ func (se *Line) String() string {
 	return s
 }
 
-func (se *Line) Jq() jquery.JQuery {
+func (se *Line) JQ() jquery.JQuery {
 	attr := js.M{
 		"x1": se.X1,
 		"y1": se.Y1,
@@ -487,7 +487,7 @@ func (se Polyline) String() string {
 type pathAction int
 
 const (
-	MOVETO pathAction = iota
+	MoveTo pathAction = iota
 	LINETO
 	HORIZONTAL_LINETO
 	VERTICAL_LINETO
@@ -518,7 +518,7 @@ type Path struct {
 	Fillable fillable
 	Strokeable
 	Editable
-	Idable
+	IDAble
 }
 
 func (ps PathItems) String() string {
@@ -582,7 +582,7 @@ type Text struct {
 	Fillable fillable
 	Strokeable
 	Editable
-	Idable
+	IDAble
 }
 
 func (se *Text) String() string {
@@ -623,7 +623,7 @@ func (se *Text) ResizeTo(w, h float64) {
 
 type Group struct {
 	Content []SvgElement `svg:"content"`
-	Idable
+	IDAble
 	Fillable fillable
 	Strokeable
 	Editable
@@ -643,7 +643,7 @@ func (se *Group) String() string {
 	return s
 }
 
-func (se *Group) Jq() jquery.JQuery {
+func (se *Group) JQ() jquery.JQuery {
 	attr := js.M{}
 	attr = mergeAttr(attr, se.Idable.Attr())
 	attr = mergeAttr(attr, se.Fillable.Attr())
